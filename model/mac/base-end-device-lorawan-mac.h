@@ -206,20 +206,6 @@ class BaseEndDeviceLorawanMac : public LorawanMac
      */
     bool GetADRBackoff(void);
     
-    /**
-     * Get the cluster of this device.
-     *
-     * \return The cluster id.
-     */
-    uint8_t GetCluster(void);
-
-    /**
-     * Set the cluster of this device.
-     *
-     * \param clusterId The id of the cluster.
-     */
-    void SetCluster(uint8_t clusterId);
-
   protected:
     void DoInitialize() override;
     void DoDispose() override;
@@ -530,8 +516,6 @@ class BaseEndDeviceLorawanMac : public LorawanMac
      * Class containing cryptographic keys and functions
      */
     LoRaMacCrypto* m_crypto;
-
-    uint8_t m_cluster;
 };
 
 } // namespace lorawan

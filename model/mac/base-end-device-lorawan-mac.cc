@@ -135,8 +135,7 @@ BaseEndDeviceLorawanMac::BaseEndDeviceLorawanMac()
       m_aggregatedDutyCycle(1),
       // Private MAC layer context
       m_lastKnownLinkMargin(0),
-      m_lastKnownGatewayCount(0),
-      m_cluster(0)
+      m_lastKnownGatewayCount(0)
 {
     NS_LOG_FUNCTION(this);
     m_crypto = new LoRaMacCrypto();
@@ -866,20 +865,6 @@ bool
 BaseEndDeviceLorawanMac::GetADRBackoff(void)
 {
     return m_enableADRBackoff;
-}
-
-uint8_t
-BaseEndDeviceLorawanMac::GetCluster(void)
-{
-    return m_cluster;
-}
-
-void
-BaseEndDeviceLorawanMac::SetCluster(uint8_t clusterId)
-{
-    NS_LOG_FUNCTION(this << unsigned(clusterId));
-
-    m_cluster = clusterId;
 }
 
 void
