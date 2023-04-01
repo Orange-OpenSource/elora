@@ -83,7 +83,7 @@ UdpForwarderHelper::InstallPriv(Ptr<Node> node) const
         if (auto loraNetDev = DynamicCast<LoraNetDevice>(currNetDev); loraNetDev != nullptr)
         {
             auto mac = DynamicCast<GatewayLorawanMac>(loraNetDev->GetMac());
-            NS_ASSERT(bool (mac));
+            NS_ASSERT(bool(mac));
             app->SetGatewayLorawanMac(mac);
             mac->SetReceiveCallback(MakeCallback(&UdpForwarder::ReceiveFromLora, app));
         }

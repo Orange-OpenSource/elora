@@ -205,7 +205,7 @@ class BaseEndDeviceLorawanMac : public LorawanMac
      * Get if data rate adaptation is enabled or not.
      */
     bool GetADRBackoff(void);
-    
+
   protected:
     void DoInitialize() override;
     void DoDispose() override;

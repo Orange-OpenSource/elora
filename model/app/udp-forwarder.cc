@@ -29,12 +29,12 @@
 #include "ns3/mac64-address.h"
 #include "ns3/nstime.h"
 #include "ns3/parson.h"
+#include "ns3/rng-seed-manager.h"
 #include "ns3/simulator.h"
 #include "ns3/socket-factory.h"
 #include "ns3/timersync.h"
 #include "ns3/trace.h"
 #include "ns3/uinteger.h"
-#include "ns3/rng-seed-manager.h"
 
 #include <arpa/inet.h>
 #include <cstdio>
