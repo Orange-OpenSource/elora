@@ -6,8 +6,8 @@ set(source_files
     model/app/server/network-status.cc
     model/app/server/gateway-status.cc
     model/app/server/end-device-status.cc
-    model/app/server/network-controller-components.cc
     model/app/server/network-controller.cc
+    model/app/server/network-controller-components.cc
     model/app/server/adr-component.cc
     model/app/forwarder.cc
     model/app/udp-forwarder.cc
@@ -71,8 +71,8 @@ set(header_files
     model/app/server/network-status.h
     model/app/server/gateway-status.h
     model/app/server/end-device-status.h
-    model/app/server/network-controller-components.h
     model/app/server/network-controller.h
+    model/app/server/network-controller-components.h
     model/app/server/adr-component.h
     model/app/forwarder.h
     model/app/udp-forwarder.h
