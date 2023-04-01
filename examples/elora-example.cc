@@ -29,7 +29,7 @@
 using namespace ns3;
 using namespace lorawan;
 
-NS_LOG_COMPONENT_DEFINE("ChirpstackExample");
+NS_LOG_COMPONENT_DEFINE("EloraExample");
 #include "utilities.cc"
 
 /* Global declaration of connection helper for signal handling */
@@ -41,6 +41,15 @@ main(int argc, char* argv[])
     /***************************
      *  Simulation parameters  *
      ***************************/
+
+    std::string tenant = "ELoRa";
+    std::string apiAddr = "127.0.0.1";
+    uint16_t apiPort = 8090;
+    std::string token =
+        "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9."
+        "eyJhdWQiOiJjaGlycHN0YWNrIiwiaXNzIjoiY2hpcnBzdGFjayIsInN1YiI6IjZlMjQ4NjljLWQxMjItNDZkOS04Nz"
+        "E0LTM5Yzc4Nzg4OTRhZCIsInR5cCI6ImtleSJ9.IB20o6Jrcwj5qZ9mPEuthzzqMyc3YNSl8by_ZXrjqhw";
+    uint16_t destPort = 1700;
 
     double periods = 24; // H * D
     int gatewayRings = 1;
@@ -55,6 +64,11 @@ main(int argc, char* argv[])
     /* Expose parameters to command line */
     {
         CommandLine cmd(__FILE__);
+        cmd.AddValue("tenant", "Chirpstack tenant name of this simulation", tenant);
+        cmd.AddValue("apiAddr", "Chirpstack REST API endpoint IP address", apiAddr);
+        cmd.AddValue("apiPort", "Chirpstack REST API endpoint IP address", apiPort);
+        cmd.AddValue("token", "Chirpstack API token (to be generated in Chirpstack UI)", token);
+        cmd.AddValue("destPort", "Port used by the Chirpstack Gateway Bridge", destPort);
         cmd.AddValue("periods", "Number of periods to simulate (1 period = 1 hour)", periods);
         cmd.AddValue("rings", "Number of gateway rings in hexagonal topology", gatewayRings);
         cmd.AddValue("range", "Radius of the device allocation disk around a gateway)", range);
@@ -86,7 +100,7 @@ main(int argc, char* argv[])
         LogComponentEnable("BaseEndDeviceLorawanMac", LOG_LEVEL_INFO);
         // LogComponentEnable ("LoraFrameHeader", LOG_LEVEL_INFO);
         /* Monitor state changes of devices */
-        LogComponentEnable("ChirpstackExample", LOG_LEVEL_ALL);
+        LogComponentEnable("EloraExample", LOG_LEVEL_ALL);
         /* Formatting */
         LogComponentEnableAll(LOG_PREFIX_FUNC);
         LogComponentEnableAll(LOG_PREFIX_NODE);
@@ -152,11 +166,11 @@ main(int argc, char* argv[])
      *  Create Nodes  *
      ******************/
 
-    Ptr<Node> bridge;
+    Ptr<Node> exitnode;
     NodeContainer gateways;
     NodeContainer endDevices;
     {
-        bridge = CreateObject<Node>();
+        exitnode = CreateObject<Node>();
 
         int nGateways = 3 * gatewayRings * gatewayRings - 3 * gatewayRings + 1;
         gateways.Create(nGateways);
@@ -171,9 +185,9 @@ main(int argc, char* argv[])
      *  Create Net Devices  *
      ************************/
 
-    /* Csma between gateways and gateway-bridge (represented by tap-bridge) */
+    /* Csma between gateways and tap-bridge (represented by exitnode) */
     {
-        NodeContainer csmaNodes(NodeContainer(bridge), gateways);
+        NodeContainer csmaNodes(NodeContainer(exitnode), gateways);
 
         // Connect the bridge to the gateways with csma
         CsmaHelper csma;
@@ -197,7 +211,7 @@ main(int argc, char* argv[])
     TapBridgeHelper tapBridge;
     tapBridge.SetAttribute("Mode", StringValue("ConfigureLocal"));
     tapBridge.SetAttribute("DeviceName", StringValue("ns3-tap"));
-    tapBridge.Install(bridge, bridge->GetDevice(0));
+    tapBridge.Install(exitnode, exitnode->GetDevice(0));
 
     /* Radio side (between end devicees and gateways) */
     LorawanHelper helper;
@@ -210,9 +224,9 @@ main(int argc, char* argv[])
         phyHelper.SetChannel(channel);
 
         // Create a LoraDeviceAddressGenerator
-        uint8_t nwkId = 54;
-        uint32_t nwkAddr = 1864;
-        auto addrGen = CreateObject<LoraDeviceAddressGenerator>(nwkId, nwkAddr);
+        /////////////////// Enables full parallelism between ELoRa instances
+        uint8_t nwkId = RngSeedManager::GetRun();
+        auto addrGen = CreateObject<LoraDeviceAddressGenerator>(nwkId);
 
         // Mac layer settings
         macHelper.SetRegion(LorawanMacHelper::EU);
@@ -237,7 +251,7 @@ main(int argc, char* argv[])
         // Install UDP forwarders in gateways
         UdpForwarderHelper forwarderHelper;
         forwarderHelper.SetAttribute("RemoteAddress", AddressValue(Ipv4Address("10.1.2.1")));
-        forwarderHelper.SetAttribute("RemotePort", UintegerValue(1700));
+        forwarderHelper.SetAttribute("RemotePort", UintegerValue(destPort));
         forwarderHelper.Install(gateways);
 
         // Install applications in EDs
@@ -265,11 +279,8 @@ main(int argc, char* argv[])
     ///////////////////// Signal handling
     OnInterrupt([](int signal) { csHelper.CloseConnection(signal); });
     ///////////////////// Register tenant, gateways, and devices on the real server
-    std::string token =
-        "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9."
-        "eyJhdWQiOiJjaGlycHN0YWNrIiwiaXNzIjoiY2hpcnBzdGFjayIsInN1YiI6IjZlMjQ4NjljLWQxMjItNDZkOS04Nz"
-        "E0LTM5Yzc4Nzg4OTRhZCIsInR5cCI6ImtleSJ9.IB20o6Jrcwj5qZ9mPEuthzzqMyc3YNSl8by_ZXrjqhw";
-    csHelper.InitConnection("127.0.0.1", 8090, token);
+    csHelper.SetTenant(tenant);
+    csHelper.InitConnection(apiAddr, apiPort, token);
     csHelper.Register(NodeContainer(endDevices, gateways));
 
     // Initialize SF emulating the ADR algorithm, then add variance to path loss
