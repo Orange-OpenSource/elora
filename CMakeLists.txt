@@ -133,7 +133,7 @@ set(header_files
 )
 
 build_lib(
-  LIBNAME lorawan-priv
+  LIBNAME lorawan
   SOURCE_FILES ${source_files}
   HEADER_FILES ${header_files}
   LIBRARIES_TO_LINK
