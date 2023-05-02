@@ -11,7 +11,7 @@ The code is an extension of the ns-3 [LoRaWAN module](https://github.com/signetl
 * A gateway application implementing the [UDP forwarder protocol](https://github.com/Lora-net/packet_forwarder/blob/master/PROTOCOL.TXT "Semtech packet forwarder implementation") running on real gateways
 * An helper to register devices and gateways in the server using the included [REST API](https://github.com/chirpstack/chirpstack-rest-api "ChirpStack gRPC to REST API proxy")
 * Cryptographyc libraries to compute the Meassage Integrity Code (MIC) and encryption of packets for devices to be recognised by the server
-* The `chirpstack-example` to show a complete usage of the traffic generator
+* The `elora-example` to show a complete usage of the traffic generator
 * Many improvements and corrections of features of the original module, such that traffic could be transparently be accepted by the server
 
 ## Prerequisites ##
@@ -19,16 +19,54 @@ The code is an extension of the ns-3 [LoRaWAN module](https://github.com/signetl
 To use this simulator you need to know the following:
 
 * The ChirpStack server needs to be running somewhere (reachable by the simulation via network)
-* The registration helper (`chirpstack-helper` class) uses the cURL library to speak to the server. [Ns-3](https://gitlab.com/nsnam/ns-3-dev "The Network Simulator, Version 3") does not support cURL by default so a minor modification is needed in the ns-3 CMake code. This change has been made in [this fork of the ns-3 repository](https://gitlab.com/non-det-alle/ns-3-dev "Ns-3 fork supporting cURL"), that has been used to test the emulator. Use the forked version which is maintaned by us, or reproduce the simple changes in your ns-3 version
-* The simulator works as is with the default configuration of Chirpstark v4 on `localhost:8080`. It has been tested with the [docker-compose installation](https://www.chirpstack.io/docs/getting-started/docker.html "Chirpstack docs: Quickstart Docker Compose") of the server. To test a distributed version of the setup, the server/port address needs to be changed in `chirpstack-example`, and ChirpStack needs to be set up such that a Gateway Bridge container remains co-located on the same machine of the ELoRa process
-* An authentification token needs to be generated in the server (API keys section), and needs to be copy-pasted in the constructor of `chirpstack-helper` class
-* Ns-3 needs to run with the `--enable-sudo` option
+* The simulator works as is with the default configuration of Chirpstark v4 on `localhost:8080`. It has been tested with the [docker-compose installation](https://www.chirpstack.io/docs/getting-started/docker.html "Chirpstack docs: Quickstart Docker Compose") of the server. To test a distributed version of the setup, the server/port address needs to be changed in `elora-example`, and ChirpStack needs to be set up such that a Gateway Bridge container remains co-located on the same machine of the ELoRa process
+* An authentification token needs to be generated in the server (API keys section), and needs to be copy-pasted in `elora-example`
 
-## Usage ##
+## Installation ##
 
-For detailed information on how to run ELoRa refer to the [USAGE.md](USAGE.md) file.
+If not already, install the `libcurl` development library in your linux distribution (`libcurl4-gnutls-dev` on Ubuntu, `curl-dev` on Alpine).
 
-For more information on how to use the underlying LoRaWAN module refer to the [original module readme](https://github.com/signetlabdei/lorawan/blob/e8f7a21044418e92759d5c7c4bcab147cdaf05b3/README.md "LoRaWAN ns-3 module README").
+Clone [ns-3](https://www.nsnam.org "ns-3 Website"), checkout the right commit, clone this repository inside the `contrib` directory, and patch ns-3 using the provided [patch file](ns-3-dev.patch) as follows:
+
+```bash
+git clone https://gitlab.com/nsnam/ns-3-dev.git
+cd ns-3-dev/
+git checkout 3f5b18b92233df894f1c7b4df61e82390fecb223
+git clone https://github.com/non-det-alle/elora.git contrib/lorawan
+patch -p1 -s < contrib/lorawan/ns-3-dev.patch
+```
+
+Make sure you are in the `ns-3-dev` folder, configure and then build ns-3:
+
+```bash
+./ns3 configure -d debug --enable-examples
+./ns3 build
+```
+## Usage examples ##
+
+The module includes the following example:
+
+- `elora-example`
+
+Examples can be run via the `./ns3 run --enable-sudo "elora-example [options]"` command.
+
+Options can be retrived with `./ns3 run "elora-example --help"`.
+
+## Documentation ##
+
+For a description of the module, refer to `doc/lorawan.rst` (currently not up to date with all functionalities).
+
+For more information on how to use the underlying LoRaWAN module refer also to the [original module readme](https://github.com/signetlabdei/lorawan/blob/e8f7a21044418e92759d5c7c4bcab147cdaf05b3/README.md "LoRaWAN ns-3 module README").
+
+- [ns-3 tutorial](https://www.nsnam.org/docs/tutorial/html "ns-3 Tutorial")
+- [ns-3 manual](https://www.nsnam.org/docs/manual/html "ns-3 Manual")
+- The LoRaWAN specification can be found on the [LoRa Alliance
+  website](http://www.lora-alliance.org)
+
+## License ##
+
+This software is licensed under the terms of the GNU GPLv2 (the same license
+that is used by ns-3). See the LICENSE.md file for more details.
 
 ## Getting help ##
 
