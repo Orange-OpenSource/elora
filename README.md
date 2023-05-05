@@ -66,6 +66,10 @@ For more information on how to use the underlying LoRaWAN module refer also to t
 - The LoRaWAN specification can be found on the [LoRa Alliance
   website](http://www.lora-alliance.org)
 
+## Copyright ##
+
+Code copyright 2022-2023 Orange. 
+
 ## License ##
 
 This software is licensed under the terms of the GNU GPLv2 (the same license
