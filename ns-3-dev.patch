@@ -1,7 +1,7 @@
 diff -ruN '--exclude=.git' ns-3-dev/CMakeLists.txt ns-3-patched/CMakeLists.txt
 --- ns-3-dev/CMakeLists.txt	2023-05-02 16:01:44.221536607 +0200
 +++ ns-3-patched/CMakeLists.txt	2023-05-02 15:58:54.783816242 +0200
-@@ -77,6 +77,7 @@
+@@ -78,6 +78,7 @@
  )
  option(NS3_PYTHON_BINDINGS "Build ns-3 python bindings" OFF)
  option(NS3_SQLITE "Build with SQLite support" ON)
@@ -25,7 +25,7 @@ diff -ruN '--exclude=.git' ns-3-dev/build-support/custom-modules/ns3-configtable
 diff -ruN '--exclude=.git' ns-3-dev/build-support/macros-and-definitions.cmake ns-3-patched/build-support/macros-and-definitions.cmake
 --- ns-3-dev/build-support/macros-and-definitions.cmake	2023-05-02 16:02:36.132855438 +0200
 +++ ns-3-patched/build-support/macros-and-definitions.cmake	2023-05-02 15:59:39.396445183 +0200
-@@ -646,6 +646,28 @@
+@@ -681,6 +681,28 @@
      endif()
    endif()
  
