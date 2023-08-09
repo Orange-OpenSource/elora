@@ -113,7 +113,7 @@ UdpForwarder::SetGatewayLorawanMac(Ptr<GatewayLorawanMac> mac)
 }
 
 bool
-UdpForwarder::ReceiveFromLora(Ptr<GatewayLorawanMac> mac, Ptr<const Packet> packet)
+UdpForwarder::ReceiveFromLora(Ptr<LorawanMac> mac, Ptr<const Packet> packet)
 {
     NS_LOG_FUNCTION(this << packet);
     Ptr<Packet> pktcpy = packet->Copy();

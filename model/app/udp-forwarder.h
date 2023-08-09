@@ -134,11 +134,11 @@ class UdpForwarder : public Application
     void SetGatewayLorawanMac(Ptr<GatewayLorawanMac> mac);
 
     /**
-     * Receive a packet from the GatewayLorawanMac.
+     * Receive a packet from the Lorawan Mac layer.
      *
      * \param packet The packet we received.
      */
-    bool ReceiveFromLora(Ptr<GatewayLorawanMac> mac, Ptr<const Packet> packet);
+    bool ReceiveFromLora(Ptr<LorawanMac> mac, Ptr<const Packet> packet);
 
   protected:
     virtual void DoDispose(void);
