@@ -216,7 +216,6 @@ main(int argc, char* argv[])
 
     /* Radio side (between end devicees and gateways) */
     LorawanHelper helper;
-    LorawanMacHelper macHelper;
     NetDeviceContainer gwNetDev;
     {
         // Physiscal layer settings
@@ -230,6 +229,7 @@ main(int argc, char* argv[])
         auto addrGen = CreateObject<LoraDeviceAddressGenerator>(nwkId);
 
         // Mac layer settings
+        LorawanMacHelper macHelper;
         macHelper.SetRegion(LorawanMacHelper::EU);
         macHelper.SetAddressGenerator(addrGen);
 
@@ -288,7 +288,7 @@ main(int argc, char* argv[])
     std::vector<int> devPerSF(1, nDevices);
     if (initializeSF)
     {
-        devPerSF = macHelper.SetSpreadingFactorsUp(endDevices, gateways, channel);
+        devPerSF = LorawanMacHelper::SetSpreadingFactorsUp(endDevices, gateways, channel);
     }
     loss->SetNext(rayleigh);
 
