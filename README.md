@@ -32,8 +32,8 @@ Clone [ns-3](https://www.nsnam.org "ns-3 Website"), checkout the right commit, c
 git clone https://gitlab.com/nsnam/ns-3-dev.git
 cd ns-3-dev/
 git checkout 54e614d474a17b40ee61d0a4db246b7936db4007
-git clone https://github.com/non-det-alle/elora.git contrib/lorawan
-patch -p1 -s < contrib/lorawan/ns-3-dev.patch
+git clone https://github.com/non-det-alle/elora.git contrib/elora
+patch -p1 -s < contrib/elora/ns-3-dev.patch
 ```
 
 Make sure you are in the `ns-3-dev` folder, configure and then build ns-3:
@@ -42,6 +42,9 @@ Make sure you are in the `ns-3-dev` folder, configure and then build ns-3:
 ./ns3 configure -d debug --enable-examples
 ./ns3 build
 ```
+
+The `elora` module extends the code of the original `lorawan` ns-3 module, thus the two modules are in conflict if they are built together. If you also have the original `lorawan` module installed (either in the `contrib` or `src` directory), run `./ns3 clean` and add the  `--enable-modules elora` option to the `./ns3 configure` command above to avoid building both.
+
 ## Usage examples ##
 
 The module includes the following example:
