@@ -54,15 +54,15 @@ set(source_files
     helper/one-shot-sender-helper.cc
     helper/urban-traffic-helper.cc
     helper/chirpstack-helper.cc
-    third_party/packet_forwarder/base64.cc
-    third_party/packet_forwarder/jitqueue.cc
-    third_party/packet_forwarder/parson.cc
-    third_party/packet_forwarder/timersync.cc
-    third_party/lora_gateway/loragw_hal.cc
-    third_party/loramac-node/LoRaMacCrypto.cc
-    third_party/loramac-node/aes.cc
-    third_party/loramac-node/utilities.cc
-    third_party/loramac-node/cmac.cc
+    third-party/packet_forwarder/base64.cc
+    third-party/packet_forwarder/jitqueue.cc
+    third-party/packet_forwarder/parson.cc
+    third-party/packet_forwarder/timersync.cc
+    third-party/lora_gateway/loragw_hal.cc
+    third-party/loramac-node/LoRaMacCrypto.cc
+    third-party/loramac-node/aes.cc
+    third-party/loramac-node/utilities.cc
+    third-party/loramac-node/cmac.cc
 )
 
 set(header_files
@@ -119,17 +119,17 @@ set(header_files
     helper/one-shot-sender-helper.h
     helper/urban-traffic-helper.h
     helper/chirpstack-helper.h
-    third_party/packet_forwarder/base64.h
-    third_party/packet_forwarder/jitqueue.h
-    third_party/packet_forwarder/parson.h
-    third_party/packet_forwarder/trace.h
-    third_party/packet_forwarder/timersync.h
-    third_party/lora_gateway/loragw_hal.h
-    third_party/loramac-node/LoRaMacCrypto.h
-    third_party/loramac-node/se-identity.h
-    third_party/loramac-node/aes.h
-    third_party/loramac-node/utilities.h
-    third_party/loramac-node/cmac.h
+    third-party/packet_forwarder/base64.h
+    third-party/packet_forwarder/jitqueue.h
+    third-party/packet_forwarder/parson.h
+    third-party/packet_forwarder/trace.h
+    third-party/packet_forwarder/timersync.h
+    third-party/lora_gateway/loragw_hal.h
+    third-party/loramac-node/LoRaMacCrypto.h
+    third-party/loramac-node/se-identity.h
+    third-party/loramac-node/aes.h
+    third-party/loramac-node/utilities.h
+    third-party/loramac-node/cmac.h
 )
 
 build_lib(
