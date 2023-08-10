@@ -138,7 +138,8 @@ main(int argc, char* argv[])
      *  Position & mobility  *
      *************************/
 
-    MobilityHelper mobilityEd, mobilityGw;
+    MobilityHelper mobilityEd;
+    MobilityHelper mobilityGw;
     Ptr<RangePositionAllocator> rangeAllocator;
     {
         // Gateway mobility
@@ -286,7 +287,9 @@ main(int argc, char* argv[])
     // Initialize SF emulating the ADR algorithm, then add variance to path loss
     std::vector<int> devPerSF(1, nDevices);
     if (initializeSF)
+    {
         devPerSF = macHelper.SetSpreadingFactorsUp(endDevices, gateways, channel);
+    }
     loss->SetNext(rayleigh);
 
 #ifdef NS3_LOG_ENABLE
@@ -300,7 +303,9 @@ main(int argc, char* argv[])
         MakeCallback(&OnStateChange));
 
     if (file)
+    {
         helper.EnablePcap("lora", gwNetDev);
+    }
 
     Simulator::Stop(Hours(1) * periods);
 

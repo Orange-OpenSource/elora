@@ -88,9 +88,13 @@ UdpForwarderHelper::InstallPriv(Ptr<Node> node) const
             mac->SetReceiveCallback(MakeCallback(&UdpForwarder::ReceiveFromLora, app));
         }
         else if (DynamicCast<CsmaNetDevice>(currNetDev))
+        {
             continue;
+        }
         else
+        {
             NS_LOG_ERROR("Potential error: NetDevice is neither Lora nor Csma");
+        }
     }
     return app;
 }

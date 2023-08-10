@@ -78,7 +78,7 @@ class ChirpstackHelper
     void SetApplication(str& name);
 
   private:
-    int DoConnect(void);
+    int DoConnect();
 
     int NewTenant(const str& name);
 
@@ -103,7 +103,7 @@ class ChirpstackHelper
 
     str m_url;
     str m_token;
-    struct curl_slist* m_header = NULL;
+    struct curl_slist* m_header = nullptr;
 
     session_t m_session;
     uint64_t m_run;

@@ -85,7 +85,9 @@ ChirpstackHelper::CloseConnection(int signal) const
 
     /* Remove tentant */
     if (DELETE("/api/tenants/" + m_session.tenantId, reply) == EXIT_FAILURE)
+    {
         NS_LOG_ERROR("Unable to unregister tenant, got reply: " << reply);
+    }
 
     /* Terminate curl */
     curl_global_cleanup();
@@ -109,7 +111,9 @@ ChirpstackHelper::Register(NodeContainer c) const
     for (NodeContainer::Iterator i = c.Begin(); i != c.End(); ++i)
     {
         if (RegisterPriv(*i) == EXIT_FAILURE)
+        {
             return EXIT_FAILURE;
+        }
     }
 
     return EXIT_SUCCESS;
@@ -134,7 +138,7 @@ ChirpstackHelper::SetApplication(str& name)
 }
 
 int
-ChirpstackHelper::DoConnect(void)
+ChirpstackHelper::DoConnect()
 {
     /* Init curl */
     curl_global_init(CURL_GLOBAL_NOTHING);
@@ -167,12 +171,16 @@ ChirpstackHelper::NewTenant(const str& name)
 
     str reply;
     if (POST("/api/tenants", payload, reply) == EXIT_FAILURE)
+    {
         NS_FATAL_ERROR("Unable to register new tenant, got reply: " << reply);
+    }
 
-    JSON_Value* json = NULL;
+    JSON_Value* json = nullptr;
     json = json_parse_string_with_comments(reply.c_str());
-    if (json == NULL)
+    if (json == nullptr)
+    {
         NS_FATAL_ERROR("Invalid JSON in tenant registration reply: " << reply);
+    }
 
     m_session.tenantId = json_object_get_string(json_value_get_object(json), "id");
     json_value_free(json);
@@ -221,12 +229,16 @@ ChirpstackHelper::NewDeviceProfile(const str& name)
 
     str reply;
     if (POST("/api/device-profiles", payload, reply) == EXIT_FAILURE)
+    {
         NS_FATAL_ERROR("Unable to register new device profile, got reply: " << reply);
+    }
 
-    JSON_Value* json = NULL;
+    JSON_Value* json = nullptr;
     json = json_parse_string_with_comments(reply.c_str());
-    if (json == NULL)
+    if (json == nullptr)
+    {
         NS_FATAL_ERROR("Invalid JSON in device profile registration reply :" << reply);
+    }
 
     m_session.devProfId = json_object_get_string(json_value_get_object(json), "id");
     json_value_free(json);
@@ -252,12 +264,16 @@ ChirpstackHelper::NewApplication(const str& name)
 
     str reply;
     if (POST("/api/applications", payload, reply) == EXIT_FAILURE)
+    {
         NS_FATAL_ERROR("Unable to register new application, got reply: " << reply);
+    }
 
-    JSON_Value* json = NULL;
+    JSON_Value* json = nullptr;
     json = json_parse_string_with_comments(reply.c_str());
-    if (json == NULL)
+    if (json == nullptr)
+    {
         NS_FATAL_ERROR("Invalid JSON in device profile registration reply: " << reply);
+    }
 
     m_session.appId = json_object_get_string(json_value_get_object(json), "id");
     json_value_free(json);
@@ -273,17 +289,25 @@ ChirpstackHelper::RegisterPriv(Ptr<Node> node) const
     Ptr<LoraNetDevice> netdev;
     // We assume nodes can have at max 1 LoraNetDevice
     for (int i = 0; i < (int)node->GetNDevices(); ++i)
+    {
         if (netdev = DynamicCast<LoraNetDevice>(node->GetDevice(i)); bool(netdev))
         {
             if (bool(DynamicCast<BaseEndDeviceLorawanMac>(netdev->GetMac())))
+            {
                 NewDevice(node);
+            }
             else if (bool(DynamicCast<GatewayLorawanMac>(netdev->GetMac())))
+            {
                 NewGateway(node);
+            }
             else
+            {
                 NS_FATAL_ERROR("No LorawanMac installed (node id: " << (unsigned)node->GetId()
                                                                     << ")");
+            }
             return EXIT_SUCCESS;
         }
+    }
 
     NS_LOG_DEBUG("No LoraNetDevice installed (node id: " << (unsigned)node->GetId() << ")");
     return EXIT_FAILURE;
@@ -320,7 +344,9 @@ ChirpstackHelper::NewDevice(Ptr<Node> node) const
 
     str reply;
     if (POST("/api/devices", payload, reply) == EXIT_FAILURE)
+    {
         NS_FATAL_ERROR("Unable to register device " << str(eui) << ", reply: " << reply);
+    }
 
     char devAddr[9];
     auto netdev = DynamicCast<LoraNetDevice>(node->GetDevice(0));
@@ -351,7 +377,9 @@ ChirpstackHelper::NewDevice(Ptr<Node> node) const
               "}";
 
     if (POST("/api/devices/" + str(eui) + "/activate", payload, reply) == EXIT_FAILURE)
+    {
         NS_FATAL_ERROR("Unable to activate device " << str(eui) << ", reply: " << reply);
+    }
 
     return EXIT_SUCCESS;
 }
@@ -403,7 +431,9 @@ ChirpstackHelper::NewGateway(Ptr<Node> node) const
 
     str reply;
     if (POST("/api/gateways", payload, reply) == EXIT_FAILURE)
+    {
         NS_FATAL_ERROR("Unable to register gateway " << str(eui) << ", reply: " << reply);
+    }
 
     return EXIT_SUCCESS;
 }
@@ -519,7 +549,9 @@ ChirpstackHelper::StreamWriteCallback(char* buffer,
     size_t realwrote = size * nitems;
     stream->write(buffer, static_cast<std::streamsize>(realwrote));
     if (!(*stream))
+    {
         realwrote = 0;
+    }
 
     return realwrote;
 }

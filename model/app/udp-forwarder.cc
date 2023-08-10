@@ -51,7 +51,7 @@ NS_LOG_COMPONENT_DEFINE("UdpForwarder");
 NS_OBJECT_ENSURE_REGISTERED(UdpForwarder);
 
 TypeId
-UdpForwarder::GetTypeId(void)
+UdpForwarder::GetTypeId()
 {
     static TypeId tid = TypeId("ns3::UdpForwarder")
                             .SetParent<Application>()
@@ -81,7 +81,7 @@ UdpForwarder::~UdpForwarder()
 }
 
 void
-UdpForwarder::DoDispose(void)
+UdpForwarder::DoDispose()
 {
     NS_LOG_FUNCTION(this);
     m_sockUp = nullptr;
@@ -122,7 +122,7 @@ UdpForwarder::ReceiveFromLora(Ptr<LorawanMac> mac, Ptr<const Packet> packet)
     pktcpy->RemovePacketTag(tag);
 
     timeval raw_time;
-    gettimeofday(&raw_time, NULL);
+    gettimeofday(&raw_time, nullptr);
 
     lgw_pkt_rx_s p;
     p.freq_hz = (uint32_t)tag.GetFrequency() + 0.5;
@@ -171,7 +171,7 @@ UdpForwarder::ReceiveFromLora(Ptr<LorawanMac> mac, Ptr<const Packet> packet)
 
 // This will act as the main of the protocol
 void
-UdpForwarder::StartApplication(void)
+UdpForwarder::StartApplication()
 {
     NS_LOG_FUNCTION(this);
 
@@ -190,12 +190,16 @@ UdpForwarder::StartApplication(void)
         if (Ipv4Address::IsMatchingType(m_peerAddress))
         {
             if (m_sockUp->Bind() == -1)
+            {
                 NS_FATAL_ERROR("Failed to bind socket");
+            }
             m_sockUp->Connect(
                 InetSocketAddress(Ipv4Address::ConvertFrom(m_peerAddress), m_peerPort));
         }
         else
+        {
             NS_ASSERT_MSG(false, "Incompatible address type: " << m_peerAddress);
+        }
     }
     /* set upstream socket RX callback */
     m_sockUp->SetRecvCallback(MakeCallback(&UdpForwarder::ReceiveAck, this));
@@ -208,12 +212,16 @@ UdpForwarder::StartApplication(void)
         if (Ipv4Address::IsMatchingType(m_peerAddress))
         {
             if (m_sockDown->Bind() == -1)
+            {
                 NS_FATAL_ERROR("Failed to bind socket");
+            }
             m_sockDown->Connect(
                 InetSocketAddress(Ipv4Address::ConvertFrom(m_peerAddress), m_peerPort));
         }
         else
+        {
             NS_ASSERT_MSG(false, "Incompatible address type: " << m_peerAddress);
+        }
     }
     /* set downstream socket RX callback */
     m_sockDown->SetRecvCallback(MakeCallback(&UdpForwarder::ReceiveDatagram, this));
@@ -244,7 +252,7 @@ UdpForwarder::StartApplication(void)
 }
 
 void
-UdpForwarder::StopApplication(void)
+UdpForwarder::StopApplication()
 {
     NS_LOG_FUNCTION(this);
 
@@ -261,7 +269,7 @@ UdpForwarder::StopApplication(void)
 }
 
 void
-UdpForwarder::Configure(void)
+UdpForwarder::Configure()
 {
     int i;
 
@@ -276,7 +284,9 @@ UdpForwarder::Configure(void)
     txlut.size = TX_GAIN_LUT_SIZE_MAX;
     std::vector<int8_t> rf_power = {-6, -3, 0, 3, 6, 10, 11, 12, 13, 14, 16, 20, 23, 25, 26, 27};
     for (i = 0; i < txlut.size; ++i)
+    {
         txlut.lut[i].rf_power = rf_power[i];
+    }
     /* all parameters parsed, submitting configuration to the HAL */
     if (txlut.size > 0)
     {
@@ -340,7 +350,7 @@ UdpForwarder::Configure(void)
 
     /* Gateway GPS coordinates hardcoding (aka. faking) option */
     gps_fake_enable = true;
-    if (gps_fake_enable == true)
+    if (gps_fake_enable)
     {
         NS_LOG_INFO("fake GPS is enabled");
     }
@@ -353,9 +363,10 @@ UdpForwarder::Configure(void)
 const struct coord_s UdpForwarder::m_center = {48.866831, 2.356719, 42};
 
 void
-UdpForwarder::ThreadUp(void)
+UdpForwarder::ThreadUp()
 {
-    int i, j;              /* loop variables */
+    int i;
+    int j;                 /* loop variables */
     unsigned pkt_in_dgram; /* nb on Lora packet in the current datagram */
 
     /* allocate memory for packet fetching and processing */
@@ -389,7 +400,7 @@ UdpForwarder::ThreadUp(void)
     send_report = report_ready; /* copy the variable so it doesn't change mid-function */
 
     /* wait a short time if no packets, nor status report */
-    if ((nb_pkt == 0) && (send_report == false))
+    if ((nb_pkt == 0) && (!send_report))
     {
         m_upEvent =
             Simulator::Schedule(MilliSeconds(FETCH_SLEEP_MS), &UdpForwarder::ThreadUp, this);
@@ -704,7 +715,7 @@ UdpForwarder::ThreadUp(void)
     /* restart fetch sequence without sending empty JSON if all packets have been filtered out */
     if (pkt_in_dgram == 0)
     {
-        if (send_report == true)
+        if (send_report)
         {
             /* need to clean up the beginning of the payload */
             buff_index -= 8; /* removes "rxpk":[ */
@@ -724,7 +735,7 @@ UdpForwarder::ThreadUp(void)
         buff_up[buff_index] = ']';
         ++buff_index;
         /* add separator if needed */
-        if (send_report == true)
+        if (send_report)
         {
             buff_up[buff_index] = ',';
             ++buff_index;
@@ -732,7 +743,7 @@ UdpForwarder::ThreadUp(void)
     }
 
     /* add status report if a new one is available */
-    if (send_report == true)
+    if (send_report)
     {
         report_ready = false;
         j = snprintf((char*)(buff_up + buff_index), TX_BUFF_SIZE - buff_index, "%s", status_report);
@@ -783,7 +794,9 @@ void
 UdpForwarder::ReceiveAck(Ptr<Socket> sockUp)
 {
     if (!m_remainingRecvAckAttempts or !m_upEvent.IsRunning())
+    {
         return;
+    }
 
     int j;
     uint8_t buff_ack[32]; /* buffer to receive acknowledges */
@@ -817,7 +830,7 @@ UdpForwarder::ReceiveAck(Ptr<Socket> sockUp)
 
 /* The following function sends a PULL request to the server */
 void
-UdpForwarder::ThreadDown(void)
+UdpForwarder::ThreadDown()
 {
     /* data buffers */
     uint8_t buff_req[12]; /* buffer to compose pull requests */
@@ -872,7 +885,7 @@ UdpForwarder::ThreadDown(void)
 }
 
 void
-UdpForwarder::CheckPullCondition(void)
+UdpForwarder::CheckPullCondition()
 {
     if ((int)difftimespec(m_downRecvTime, m_downSendTime) < keepalive_time)
     {
@@ -890,7 +903,7 @@ UdpForwarder::CheckPullCondition(void)
 }
 
 void
-UdpForwarder::SockDownTimeout(void)
+UdpForwarder::SockDownTimeout()
 {
     clock_gettime(CLOCK_MONOTONIC, &m_downRecvTime);
     CheckPullCondition();
@@ -909,11 +922,12 @@ UdpForwarder::ReceiveDatagram(Ptr<Socket> sockDown)
     int msg_len;
 
     /* JSON parsing variables */
-    JSON_Value* root_val = NULL;
-    JSON_Object* txpk_obj = NULL;
-    JSON_Value* val = NULL; /* needed to detect the absence of some fields */
-    const char* str;        /* pointer to sub-strings in the JSON data */
-    short x0, x1;
+    JSON_Value* root_val = nullptr;
+    JSON_Object* txpk_obj = nullptr;
+    JSON_Value* val = nullptr; /* needed to detect the absence of some fields */
+    const char* str;           /* pointer to sub-strings in the JSON data */
+    short x0;
+    short x1;
 
     /* Just In Time downlink */
     struct timeval current_unix_time;
@@ -977,7 +991,7 @@ UdpForwarder::ReceiveDatagram(Ptr<Socket> sockDown)
     /* initialize TX struct and try to parse JSON */
     memset(&txpkt, 0, sizeof txpkt);
     root_val = json_parse_string_with_comments((const char*)(buff_down + 4)); /* JSON offset */
-    if (root_val == NULL)
+    if (root_val == nullptr)
     {
         NS_LOG_WARN("[down] invalid JSON, TX aborted");
         return CheckPullCondition();
@@ -985,7 +999,7 @@ UdpForwarder::ReceiveDatagram(Ptr<Socket> sockDown)
 
     /* look for JSON sub-object 'txpk' */
     txpk_obj = json_object_get_object(json_value_get_object(root_val), "txpk");
-    if (txpk_obj == NULL)
+    if (txpk_obj == nullptr)
     {
         NS_LOG_WARN("[down] no \"txpk\" object in JSON, TX aborted");
         json_value_free(root_val);
@@ -1009,7 +1023,7 @@ UdpForwarder::ReceiveDatagram(Ptr<Socket> sockDown)
     else
     {
         val = json_object_get_value(txpk_obj, "tmst");
-        if (val != NULL)
+        if (val != nullptr)
         {
             /* TX procedure: send on timestamp value */
             txpkt.count_us = (uint32_t)json_value_get_number(val);
@@ -1021,7 +1035,7 @@ UdpForwarder::ReceiveDatagram(Ptr<Socket> sockDown)
         {
             /* TX procedure: send on GPS time (converted to timestamp value) */
             val = json_object_get_value(txpk_obj, "tmms");
-            if (val == NULL)
+            if (val == nullptr)
             {
                 NS_LOG_WARN("[down] no mandatory \"txpk.tmst\" or \"txpk.tmms\" objects in "
                             "JSON, TX aborted");
@@ -1043,14 +1057,14 @@ UdpForwarder::ReceiveDatagram(Ptr<Socket> sockDown)
 
     /* Parse "No CRC" flag (optional field) */
     val = json_object_get_value(txpk_obj, "ncrc");
-    if (val != NULL)
+    if (val != nullptr)
     {
         txpkt.no_crc = (bool)json_value_get_boolean(val);
     }
 
     /* parse target frequency (mandatory) */
     val = json_object_get_value(txpk_obj, "freq");
-    if (val == NULL)
+    if (val == nullptr)
     {
         NS_LOG_WARN("[down] no mandatory \"txpk.freq\" object in JSON, TX aborted");
         json_value_free(root_val);
@@ -1060,7 +1074,7 @@ UdpForwarder::ReceiveDatagram(Ptr<Socket> sockDown)
 
     /* parse RF chain used for TX (mandatory) */
     val = json_object_get_value(txpk_obj, "rfch");
-    if (val == NULL)
+    if (val == nullptr)
     {
         NS_LOG_WARN("[down] no mandatory \"txpk.rfch\" object in JSON, TX aborted");
         json_value_free(root_val);
@@ -1070,14 +1084,14 @@ UdpForwarder::ReceiveDatagram(Ptr<Socket> sockDown)
 
     /* parse TX power (optional field) */
     val = json_object_get_value(txpk_obj, "powe");
-    if (val != NULL)
+    if (val != nullptr)
     {
         txpkt.rf_power = (int8_t)json_value_get_number(val) - antenna_gain;
     }
 
     /* Parse modulation (mandatory) */
     str = json_object_get_string(txpk_obj, "modu");
-    if (str == NULL)
+    if (str == nullptr)
     {
         NS_LOG_WARN("[down] no mandatory \"txpk.modu\" object in JSON, TX aborted");
         json_value_free(root_val);
@@ -1090,7 +1104,7 @@ UdpForwarder::ReceiveDatagram(Ptr<Socket> sockDown)
 
         /* Parse Lora spreading-factor and modulation bandwidth (mandatory) */
         str = json_object_get_string(txpk_obj, "datr");
-        if (str == NULL)
+        if (str == nullptr)
         {
             NS_LOG_WARN("[down] no mandatory \"txpk.datr\" object in JSON, TX aborted");
             json_value_free(root_val);
@@ -1147,24 +1161,36 @@ UdpForwarder::ReceiveDatagram(Ptr<Socket> sockDown)
 
         /* Parse ECC coding rate (optional field) */
         str = json_object_get_string(txpk_obj, "codr");
-        if (str == NULL)
+        if (str == nullptr)
         {
             NS_LOG_WARN("[down] no mandatory \"txpk.codr\" object in json, TX aborted");
             json_value_free(root_val);
             return CheckPullCondition();
         }
         if (strcmp(str, "4/5") == 0)
+        {
             txpkt.coderate = CR_LORA_4_5;
+        }
         else if (strcmp(str, "4/6") == 0)
+        {
             txpkt.coderate = CR_LORA_4_6;
+        }
         else if (strcmp(str, "2/3") == 0)
+        {
             txpkt.coderate = CR_LORA_4_6;
+        }
         else if (strcmp(str, "4/7") == 0)
+        {
             txpkt.coderate = CR_LORA_4_7;
+        }
         else if (strcmp(str, "4/8") == 0)
+        {
             txpkt.coderate = CR_LORA_4_8;
+        }
         else if (strcmp(str, "1/2") == 0)
+        {
             txpkt.coderate = CR_LORA_4_8;
+        }
         else
         {
             NS_LOG_WARN("[down] format error in \"txpk.codr\", TX aborted");
@@ -1174,14 +1200,14 @@ UdpForwarder::ReceiveDatagram(Ptr<Socket> sockDown)
 
         /* Parse signal polarity switch (optional field) */
         val = json_object_get_value(txpk_obj, "ipol");
-        if (val != NULL)
+        if (val != nullptr)
         {
             txpkt.invert_pol = (bool)json_value_get_boolean(val);
         }
 
         /* parse Lora preamble length (optional field, optimum min value enforced) */
         val = json_object_get_value(txpk_obj, "prea");
-        if (val != NULL)
+        if (val != nullptr)
         {
             i = (int)json_value_get_number(val);
             if (i >= MIN_LORA_PREAMB)
@@ -1217,7 +1243,7 @@ UdpForwarder::ReceiveDatagram(Ptr<Socket> sockDown)
 
     /* Parse payload length (mandatory) */
     val = json_object_get_value(txpk_obj, "size");
-    if (val == NULL)
+    if (val == nullptr)
     {
         NS_LOG_WARN("[down] no mandatory \"txpk.size\" object in JSON, TX aborted");
         json_value_free(root_val);
@@ -1227,7 +1253,7 @@ UdpForwarder::ReceiveDatagram(Ptr<Socket> sockDown)
 
     /* Parse payload data (mandatory) */
     str = json_object_get_string(txpk_obj, "data");
-    if (str == NULL)
+    if (str == nullptr)
     {
         NS_LOG_WARN("[down] no mandatory \"txpk.data\" object in JSON, TX aborted");
         json_value_free(root_val);
@@ -1282,7 +1308,7 @@ UdpForwarder::ReceiveDatagram(Ptr<Socket> sockDown)
     /* insert packet to be sent into JIT queue */
     if (jit_result == JIT_ERROR_OK)
     {
-        gettimeofday(&current_unix_time, NULL);
+        gettimeofday(&current_unix_time, nullptr);
         get_concentrator_time(&current_concentrator_time, current_unix_time);
         jit_result = jit_enqueue(&jit_queue, &current_concentrator_time, &txpkt, downlink_type);
         if (jit_result != JIT_ERROR_OK)
@@ -1299,7 +1325,7 @@ UdpForwarder::ReceiveDatagram(Ptr<Socket> sockDown)
 }
 
 void
-UdpForwarder::ThreadJit(void)
+UdpForwarder::ThreadJit()
 {
     int result = LGW_HAL_SUCCESS;
     struct lgw_pkt_tx_s pkt;
@@ -1311,7 +1337,7 @@ UdpForwarder::ThreadJit(void)
     uint8_t tx_status;
 
     /* transfer data and metadata to the concentrator, and schedule TX */
-    gettimeofday(&current_unix_time, NULL);
+    gettimeofday(&current_unix_time, nullptr);
     get_concentrator_time(&current_concentrator_time, current_unix_time);
     jit_result = jit_peek(&jit_queue, &current_concentrator_time, &pkt_index);
     if (jit_result == JIT_ERROR_OK)
@@ -1383,7 +1409,7 @@ UdpForwarder::ThreadJit(void)
 }
 
 void
-UdpForwarder::CollectStatistics(void)
+UdpForwarder::CollectStatistics()
 {
     /* statistics variable */
     time_t t;
@@ -1395,7 +1421,7 @@ UdpForwarder::CollectStatistics(void)
     float dw_ack_ratio;
 
     /* get timestamp for statistics */
-    t = time(NULL);
+    t = time(nullptr);
     strftime(stat_timestamp, sizeof stat_timestamp, "%F %T %Z", gmtime(&t));
 
     /* aggregate upstream statistics */
@@ -1548,7 +1574,7 @@ UdpForwarder::CollectStatistics(void)
 #endif // NS3_LOG_ENABLE
 
     /* generate a JSON report (will be sent to server by upstream thread) */
-    if (gps_fake_enable == true)
+    if (gps_fake_enable)
     {
         snprintf(status_report,
                  STATUS_SIZE,
@@ -1632,7 +1658,7 @@ UdpForwarder::LgwStatus(uint8_t select, uint8_t* code)
     if (select == TX_STATUS)
     {
         read_value = (m_mac->IsTransmitting()) ? 0x70 : 0x0;
-        if (lgw_is_started == false)
+        if (!lgw_is_started)
         {
             *code = TX_OFF;
         }
@@ -1671,7 +1697,7 @@ UdpForwarder::LgwSend(struct lgw_pkt_tx_s pkt_data)
     bool tx_allowed = false;
 
     /* check if the concentrator is running */
-    if (lgw_is_started == false)
+    if (!lgw_is_started)
     {
         NS_LOG_ERROR("CONCENTRATOR IS NOT RUNNING, START IT BEFORE SENDING");
         return LGW_HAL_ERROR;
@@ -1778,7 +1804,7 @@ UdpForwarder::LgwSend(struct lgw_pkt_tx_s pkt_data)
 
     /* We assume LBT is disabled: same outcome, more interference downlink */
     tx_allowed = true;
-    if (tx_allowed == true)
+    if (tx_allowed)
     {
         m_mac->Send(pkt);
     }

@@ -108,11 +108,11 @@ class UdpForwarder : public Application
      * \brief Get the type ID.
      * \return the object TypeId
      */
-    static TypeId GetTypeId(void);
+    static TypeId GetTypeId();
 
     UdpForwarder();
 
-    virtual ~UdpForwarder();
+    ~UdpForwarder() override;
 
     /**
      * \brief set the remote address and port
@@ -141,11 +141,11 @@ class UdpForwarder : public Application
     bool ReceiveFromLora(Ptr<LorawanMac> mac, Ptr<const Packet> packet);
 
   protected:
-    virtual void DoDispose(void);
+    void DoDispose() override;
 
   private:
-    virtual void StartApplication(void);
-    virtual void StopApplication(void);
+    void StartApplication() override;
+    void StopApplication() override;
 
     Address m_peerAddress; //!< Remote peer address
     uint16_t m_peerPort;   //!< Remote peer port
@@ -159,10 +159,10 @@ class UdpForwarder : public Application
     /* ---------------- Ns-3 INTEGRATION of lora_pkt_fwd.c ---------------------- */
 
     /* Emulate lora_pkt_fwd.c parse_SX1301_configuration() & parse_gateway_configuration() */
-    void Configure(void);
+    void Configure();
     static const struct coord_s m_center;
 
-    void ThreadUp(void); //!< Emulate lora_pkt_fwd.c uplink forwarding loop
+    void ThreadUp(); //!< Emulate lora_pkt_fwd.c uplink forwarding loop
     /* THREAD UP auxiliary variables */
     Ptr<Socket> m_sockUp; //!< Socket Up
     EventId m_upEvent;    //!< Event to forward packets uplink
@@ -175,7 +175,7 @@ class UdpForwarder : public Application
     uint8_t m_remainingRecvAckAttempts;
     void ReceiveAck(Ptr<Socket> sockUp);
 
-    void ThreadDown(void); //!< Emulate lora_pkt_fwd.c downlink reception loop
+    void ThreadDown(); //!< Emulate lora_pkt_fwd.c downlink reception loop
     /* THREAD DOWN auxiliary variables */
     Ptr<Socket> m_sockDown; //!< Socket Down
     EventId m_downEvent;
@@ -188,14 +188,14 @@ class UdpForwarder : public Application
     timespec m_downRecvTime;
     /* auto-quit variable */
     uint32_t m_autoquitCnt; /* count the number of PULL_DATA sent since the latest PULL_ACK */
-    void CheckPullCondition(void);
-    void SockDownTimeout(void);
+    void CheckPullCondition();
+    void SockDownTimeout();
     void ReceiveDatagram(Ptr<Socket> sockDown);
 
-    void ThreadJit(void); //!< Emulate lora_pkt_fwd.c loop to send downlink packets in jit queue
+    void ThreadJit(); //!< Emulate lora_pkt_fwd.c loop to send downlink packets in jit queue
     EventId m_jitEvent;
 
-    void CollectStatistics(void); //!< Emulate lora_pkt_fwd.c stats collection loop
+    void CollectStatistics(); //!< Emulate lora_pkt_fwd.c stats collection loop
     EventId m_statsEvent;
 
     /* -------------------------------------------------------------------------- */
