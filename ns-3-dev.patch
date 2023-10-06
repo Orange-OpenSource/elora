@@ -1,7 +1,7 @@
 diff -ruN '--exclude=.git' ns-3-dev/CMakeLists.txt ns-3-patched/CMakeLists.txt
 --- ns-3-dev/CMakeLists.txt	2023-05-02 16:01:44.221536607 +0200
 +++ ns-3-patched/CMakeLists.txt	2023-05-02 15:58:54.783816242 +0200
-@@ -78,6 +78,7 @@
+@@ -79,6 +79,7 @@
  )
  option(NS3_PYTHON_BINDINGS "Build ns-3 python bindings" OFF)
  option(NS3_SQLITE "Build with SQLite support" ON)
@@ -12,20 +12,20 @@ diff -ruN '--exclude=.git' ns-3-dev/CMakeLists.txt ns-3-patched/CMakeLists.txt
 diff -ruN '--exclude=.git' ns-3-dev/build-support/custom-modules/ns3-configtable.cmake ns-3-patched/build-support/custom-modules/ns3-configtable.cmake
 --- ns-3-dev/build-support/custom-modules/ns3-configtable.cmake	2023-05-02 16:01:44.221536607 +0200
 +++ ns-3-patched/build-support/custom-modules/ns3-configtable.cmake	2023-05-02 16:00:22.268971508 +0200
-@@ -176,6 +176,9 @@
+@@ -184,6 +184,9 @@
    string(APPEND out "SQLite support                : ")
-   check_on_or_off("${NS3_SQLITE}" "${ENABLE_SQLITE}")
+   check_on_or_off("NS3_SQLITE" "ENABLE_SQLITE")
  
 +  string(APPEND out "cURL support                  : ")
-+  check_on_or_off("${NS3_CURL}" "${ENABLE_CURL}")
++  check_on_or_off("NS3_CURL" "ENABLE_CURL")
 +  
    string(APPEND out "Eigen3 support                : ")
-   check_on_or_off("${NS3_EIGEN}" "${ENABLE_EIGEN}")
+   check_on_or_off("NS3_EIGEN" "ENABLE_EIGEN")
  
 diff -ruN '--exclude=.git' ns-3-dev/build-support/macros-and-definitions.cmake ns-3-patched/build-support/macros-and-definitions.cmake
 --- ns-3-dev/build-support/macros-and-definitions.cmake	2023-05-02 16:02:36.132855438 +0200
 +++ ns-3-patched/build-support/macros-and-definitions.cmake	2023-05-02 15:59:39.396445183 +0200
-@@ -681,6 +681,28 @@
+@@ -797,6 +797,24 @@
      endif()
    endif()
  
@@ -47,10 +47,6 @@ diff -ruN '--exclude=.git' ns-3-dev/build-support/macros-and-definitions.cmake n
 +    endif()
 +  endif()
 +
-+  if(${NS3_NATIVE_OPTIMIZATIONS} AND ${GCC})
-+    add_compile_options(-march=native -mtune=native)
-+  endif()
-+
-   if(${NS3_NATIVE_OPTIMIZATIONS} AND ${GCC})
-     add_compile_options(-march=native -mtune=native)
-   endif()
+   set(ENABLE_EIGEN False)
+   if(${NS3_EIGEN})
+     find_package(Eigen3 QUIET)

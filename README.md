@@ -31,7 +31,7 @@ Clone [ns-3](https://www.nsnam.org "ns-3 Website"), checkout the right commit, c
 ```bash
 git clone https://gitlab.com/nsnam/ns-3-dev.git
 cd ns-3-dev/
-git checkout 54e614d474a17b40ee61d0a4db246b7936db4007
+git checkout ns-3.40
 git clone https://github.com/non-det-alle/elora.git contrib/elora
 patch -p1 -s < contrib/elora/ns-3-dev.patch
 ```
