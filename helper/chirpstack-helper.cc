@@ -421,6 +421,7 @@ ChirpstackHelper::NewGateway(Ptr<Node> node) const
                   "    \"name\": \"Gateway " +
                   std::to_string((unsigned)id) +
                   "\","
+                  "    \"statsInterval\": 30,"
                   "    \"properties\": {},"
                   "    \"tags\": {},"
                   "    \"tenantId\": \"" +
