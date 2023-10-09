@@ -165,7 +165,8 @@ ChirpstackHelper::NewTenant(const str& name)
                   "    \"name\": \"" +
                   name + "-" + std::to_string((unsigned)m_run) +
                   "\","
-                  "    \"privateGateways\": false"
+                  "    \"privateGatewaysDown\": false,"
+                  "    \"privateGatewaysUp\": false"
                   "  }"
                   "}";
 
@@ -198,24 +199,48 @@ ChirpstackHelper::NewDeviceProfile(const str& name)
                   "    \"abpRx2Dr\": 0,"
                   "    \"abpRx2Freq\": 869525000,"
                   "    \"adrAlgorithmId\": \"default\","
+                  "    \"autoDetectMeasurements\": true,"
                   "    \"classBPingSlotDr\": 0,"
                   "    \"classBPingSlotFreq\": 0,"
-                  "    \"classBPingSlotPeriod\": 0,"
+                  "    \"classBPingSlotNbK\": 0,"
                   "    \"classBTimeout\": 0,"
                   "    \"classCTimeout\": 0,"
                   "    \"description\": \"\","
                   "    \"deviceStatusReqInterval\": 0,"
                   "    \"flushQueueOnActivate\": false,"
-                  "    \"id\": \"string\","
+                  "    \"id\": \"\","
+                  "    \"isRelay\": false,"
+                  "    \"isRelayEd\": false,"
                   "    \"macVersion\": \"LORAWAN_1_0_4\","
                   "    \"measurements\": {},"
                   "    \"name\": \"" +
                   name +
                   "\","
                   "    \"payloadCodecRuntime\": \"NONE\","
-                  "    \"payloadCodecScript\": \"string\","
+                  "    \"payloadCodecScript\": \"\","
                   "    \"regParamsRevision\": \"RP002_1_0_3\","
                   "    \"region\": \"EU868\","
+                  "    \"regionConfigId\": \"\","
+                  "    \"relayCadPeriodicity\": \"SEC_1\","
+                  "    \"relayDefaultChannelIndex\": 0,"
+                  "    \"relayEdActivationMode\": \"DISABLE_RELAY_MODE\","
+                  "    \"relayEdBackOff\": 0,"
+                  "    \"relayEdRelayOnly\": true,"
+                  "    \"relayEdSmartEnableLevel\": 0,"
+                  "    \"relayEdUplinkLimitBucketSize\": 0,"
+                  "    \"relayEdUplinkLimitReloadRate\": 0,"
+                  "    \"relayEnabled\": true,"
+                  "    \"relayGlobalUplinkLimitBucketSize\": 0,"
+                  "    \"relayGlobalUplinkLimitReloadRate\": 0,"
+                  "    \"relayJoinReqLimitBucketSize\": 0,"
+                  "    \"relayJoinReqLimitReloadRate\": 0,"
+                  "    \"relayNotifyLimitBucketSize\": 0,"
+                  "    \"relayNotifyLimitReloadRate\": 0,"
+                  "    \"relayOverallLimitBucketSize\": 0,"
+                  "    \"relayOverallLimitReloadRate\": 0,"
+                  "    \"relaySecondChannelAckOffset\": \"KHZ_0\","
+                  "    \"relaySecondChannelDr\": 0,"
+                  "    \"relaySecondChannelFreq\": 0,"
                   "    \"supportsClassB\": false,"
                   "    \"supportsClassC\": false,"
                   "    \"supportsOtaa\": false,"
@@ -418,9 +443,10 @@ ChirpstackHelper::NewGateway(Ptr<Node> node) const
                   str(coordbuf) +
                   "      \"source\": \"UNKNOWN\""
                   "    },"
-                  "    \"name\": \"Gateway " +
-                  std::to_string((unsigned)id) +
+                  "    \"metadata\": {}," +
+                  "    \"name\": \"Gateway " + std::to_string((unsigned)id) +
                   "\","
+                  "    \"statsInterval\": 30,"
                   "    \"properties\": {},"
                   "    \"tags\": {},"
                   "    \"tenantId\": \"" +
