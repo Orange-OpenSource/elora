@@ -47,8 +47,8 @@ main(int argc, char* argv[])
     uint16_t apiPort = 8090;
     std::string token =
         "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9."
-        "eyJhdWQiOiJjaGlycHN0YWNrIiwiaXNzIjoiY2hpcnBzdGFjayIsInN1YiI6IjZlMjQ4NjljLWQxMjItNDZkOS04Nz"
-        "E0LTM5Yzc4Nzg4OTRhZCIsInR5cCI6ImtleSJ9.IB20o6Jrcwj5qZ9mPEuthzzqMyc3YNSl8by_ZXrjqhw";
+        "eyJhdWQiOiJjaGlycHN0YWNrIiwiaXNzIjoiY2hpcnBzdGFjayIsInN1YiI6ImQ2ZGQ4OGFiLTNmN2MtNGJlZi1hZW"
+        "U1LWVmZGRkNWEyZmE3MSIsInR5cCI6ImtleSJ9.UJmVOv2Chbh1T5xjUSBF9jZuGmmLg3xu7Dg_77otxkA";
     uint16_t destPort = 1700;
 
     double periods = 24; // H * D
@@ -88,6 +88,8 @@ main(int argc, char* argv[])
     GlobalValue::Bind("ChecksumEnabled", BooleanValue(true));
     Config::SetDefault("ns3::BaseEndDeviceLorawanMac::ADRBackoff", BooleanValue(true));
     Config::SetDefault("ns3::BaseEndDeviceLorawanMac::EnableCryptography", BooleanValue(true));
+    Config::SetDefault("ns3::BaseEndDeviceLorawanMac::FType",
+                       EnumValue(LorawanMacHeader::CONFIRMED_DATA_UP));
     ///////////////// Needed to manage the variance introduced by real world interaction
     Config::SetDefault("ns3::ClassAEndDeviceLorawanMac::RecvWinSymb", UintegerValue(16));
 
