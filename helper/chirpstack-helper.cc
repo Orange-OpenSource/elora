@@ -79,8 +79,10 @@ ChirpstackHelper::InitConnection(const str address, uint16_t port, const str tok
 }
 
 void
-ChirpstackHelper::CloseConnection(int signal) const
+ChirpstackHelper::CloseConnection(int signal)
 {
+    NS_ASSERT_MSG(!m_session.tenantId.empty(), "Connection was not initialized before closing it");
+
     str reply;
 
     /* Remove tentant */
@@ -88,6 +90,11 @@ ChirpstackHelper::CloseConnection(int signal) const
     {
         NS_LOG_ERROR("Unable to unregister tenant, got reply: " << reply);
     }
+
+    /* Wipe session data */
+    m_session.tenantId.clear();
+    m_session.devProfId.clear();
+    m_session.appId.clear();
 
     /* Terminate curl */
     curl_global_cleanup();
@@ -119,6 +126,76 @@ ChirpstackHelper::Register(NodeContainer c) const
     return EXIT_SUCCESS;
 }
 
+int
+ChirpstackHelper::CreateHttpIntegration(const str& encoding, const str& endpoint) const
+{
+    NS_ASSERT_MSG(!m_session.tenantId.empty(),
+                  "Connection was not initialized before creating integration");
+
+    str payload = "{"
+                  "  \"integration\": {"
+                  "    \"encoding\": \"" +
+                  encoding + // JSON or PROTOBUF
+                  "\","
+                  "    \"eventEndpointUrl\": \"" +
+                  endpoint + // e.g. http://http-server:8081
+                  "\","
+                  "    \"headers\": {}"
+                  "  }"
+                  "}";
+
+    str reply;
+    if (POST("/api/applications/" + m_session.appId + "/integrations/http", payload, reply) ==
+        EXIT_FAILURE)
+    {
+        NS_FATAL_ERROR("Unable to register new integration, got reply: " << reply);
+    }
+
+    return EXIT_SUCCESS;
+}
+
+int
+ChirpstackHelper::CreateInfluxDb2Integration(const str& endpoint,
+                                             const str& organization,
+                                             const str& bucket,
+                                             const str& token) const
+{
+    NS_ASSERT_MSG(!m_session.tenantId.empty(),
+                  "Connection was not initialized before creating integration");
+
+    str payload = "{"
+                  "  \"integration\": {"
+                  "    \"bucket\": \"" +
+                  bucket +
+                  "\","
+                  "    \"db\": \"\"," // unused in InfluxDb v2
+                  "    \"endpoint\": \"" +
+                  endpoint +
+                  "\","
+                  "    \"organization\": \"" +
+                  organization +
+                  "\","
+                  "    \"password\": \"\","            // unused in InfluxDb v2
+                  "    \"precision\": \"NS\","         // unused in InfluxDb v2
+                  "    \"retentionPolicyName\": \"\"," // unused in InfluxDb v2
+                  "    \"username\": \"\","            // unused in InfluxDb v2
+                  "    \"token\": \"" +
+                  token +
+                  "\","
+                  "    \"version\": \"INFLUXDB_2\""
+                  "  }"
+                  "}";
+
+    str reply;
+    if (POST("/api/applications/" + m_session.appId + "/integrations/influxdb", payload, reply) ==
+        EXIT_FAILURE)
+    {
+        NS_FATAL_ERROR("Unable to register new integration, got reply: " << reply);
+    }
+
+    return EXIT_SUCCESS;
+}
+
 void
 ChirpstackHelper::SetTenant(str& name)
 {
@@ -143,17 +220,17 @@ ChirpstackHelper::DoConnect()
     /* Init curl */
     curl_global_init(CURL_GLOBAL_NOTHING);
     /* Create Ns-3 tenant */
-    NewTenant(m_session.tenant);
+    CreateTenant(m_session.tenant);
     /* Create Ns-3 device profile */
-    NewDeviceProfile(m_session.devProf);
+    CreateDeviceProfile(m_session.devProf);
     /* Create Ns-3 application */
-    NewApplication(m_session.app);
+    CreateApplication(m_session.app);
 
     return EXIT_SUCCESS;
 }
 
 int
-ChirpstackHelper::NewTenant(const str& name)
+ChirpstackHelper::CreateTenant(const str& name)
 {
     str payload = "{"
                   "  \"tenant\": {"
@@ -190,7 +267,7 @@ ChirpstackHelper::NewTenant(const str& name)
 }
 
 int
-ChirpstackHelper::NewDeviceProfile(const str& name)
+ChirpstackHelper::CreateDeviceProfile(const str& name)
 {
     str payload = "{"
                   "  \"deviceProfile\": {"
@@ -272,7 +349,7 @@ ChirpstackHelper::NewDeviceProfile(const str& name)
 }
 
 int
-ChirpstackHelper::NewApplication(const str& name)
+ChirpstackHelper::CreateApplication(const str& name)
 {
     str payload = "{"
                   "  \"application\": {"
@@ -297,7 +374,7 @@ ChirpstackHelper::NewApplication(const str& name)
     json = json_parse_string_with_comments(reply.c_str());
     if (json == nullptr)
     {
-        NS_FATAL_ERROR("Invalid JSON in device profile registration reply: " << reply);
+        NS_FATAL_ERROR("Invalid JSON in application registration reply: " << reply);
     }
 
     m_session.appId = json_object_get_string(json_value_get_object(json), "id");
@@ -310,6 +387,8 @@ int
 ChirpstackHelper::RegisterPriv(Ptr<Node> node) const
 {
     NS_LOG_FUNCTION(this << node);
+    NS_ASSERT_MSG(!m_session.tenantId.empty(),
+                  "Connection was not initialized before registering device");
 
     Ptr<LoraNetDevice> netdev;
     // We assume nodes can have at max 1 LoraNetDevice
@@ -319,11 +398,11 @@ ChirpstackHelper::RegisterPriv(Ptr<Node> node) const
         {
             if (bool(DynamicCast<BaseEndDeviceLorawanMac>(netdev->GetMac())))
             {
-                NewDevice(node);
+                CreateDevice(node);
             }
             else if (bool(DynamicCast<GatewayLorawanMac>(netdev->GetMac())))
             {
-                NewGateway(node);
+                CreateGateway(node);
             }
             else
             {
@@ -339,7 +418,7 @@ ChirpstackHelper::RegisterPriv(Ptr<Node> node) const
 }
 
 int
-ChirpstackHelper::NewDevice(Ptr<Node> node) const
+ChirpstackHelper::CreateDevice(Ptr<Node> node) const
 {
     char eui[17];
     uint64_t id = (m_run << 48) + node->GetId();
@@ -410,7 +489,7 @@ ChirpstackHelper::NewDevice(Ptr<Node> node) const
 }
 
 int
-ChirpstackHelper::NewGateway(Ptr<Node> node) const
+ChirpstackHelper::CreateGateway(Ptr<Node> node) const
 {
     char eui[17];
     uint64_t id = (m_run << 48) + node->GetId();

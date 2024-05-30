@@ -65,11 +65,18 @@ class ChirpstackHelper
 
     int InitConnection(const str address, uint16_t port, const str token);
 
-    void CloseConnection(int signal) const;
+    void CloseConnection(int signal);
 
     int Register(NodeContainer c) const;
 
     int Register(Ptr<Node> node) const;
+
+    int CreateHttpIntegration(const str& encoding, const str& endpoint) const;
+
+    int CreateInfluxDb2Integration(const str& endpoint,
+                                   const str& organization,
+                                   const str& bucket,
+                                   const str& token) const;
 
     void SetTenant(str& name);
 
@@ -80,17 +87,17 @@ class ChirpstackHelper
   private:
     int DoConnect();
 
-    int NewTenant(const str& name);
+    int CreateTenant(const str& name);
 
-    int NewDeviceProfile(const str& name);
+    int CreateDeviceProfile(const str& name);
 
-    int NewApplication(const str& name);
+    int CreateApplication(const str& name);
 
     int RegisterPriv(Ptr<Node> node) const;
 
-    int NewDevice(Ptr<Node> node) const;
+    int CreateDevice(Ptr<Node> node) const;
 
-    int NewGateway(Ptr<Node> node) const;
+    int CreateGateway(Ptr<Node> node) const;
 
     int POST(const str& path, const str& body, str& out) const;
 
