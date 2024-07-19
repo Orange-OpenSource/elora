@@ -3,7 +3,7 @@ build_lib_example(
   SOURCE_FILES simple-network-example.cc
   LIBRARIES_TO_LINK
     ${libcore}
-    ${liblorawan}
+    ${libelora}
 )
 
 build_lib_example(
@@ -11,7 +11,7 @@ build_lib_example(
   SOURCE_FILES network-server-example.cc
   LIBRARIES_TO_LINK
     ${libcore}
-    ${liblorawan}
+    ${libelora}
 )
 
 build_lib_example(
@@ -19,7 +19,7 @@ build_lib_example(
   SOURCE_FILES complete-network-example.cc
   LIBRARIES_TO_LINK
     ${libcore}
-    ${liblorawan}
+    ${libelora}
 )
 
 build_lib_example(
@@ -27,7 +27,7 @@ build_lib_example(
   SOURCE_FILES adr-example.cc
   LIBRARIES_TO_LINK
     ${libcore}
-    ${liblorawan}
+    ${libelora}
 )
 
 build_lib_example(
@@ -35,7 +35,7 @@ build_lib_example(
   SOURCE_FILES lorawan-energy-model-example.cc
   LIBRARIES_TO_LINK
     ${libcore}
-    ${liblorawan}
+    ${libelora}
 )
 
 build_lib_example(
@@ -43,7 +43,7 @@ build_lib_example(
   SOURCE_FILES aloha-throughput.cc
   LIBRARIES_TO_LINK
     ${libcore}
-    ${liblorawan}
+    ${libelora}
 )
 
 build_lib_example(
@@ -51,7 +51,7 @@ build_lib_example(
   SOURCE_FILES parallel-reception-example.cc
   LIBRARIES_TO_LINK
     ${libcore}
-    ${liblorawan}
+    ${libelora}
 )
 
 build_lib_example(
@@ -59,7 +59,7 @@ build_lib_example(
   SOURCE_FILES frame-counter-update.cc
   LIBRARIES_TO_LINK
     ${libcore}
-    ${liblorawan}
+    ${libelora}
 )
 
 build_lib_example(
@@ -67,7 +67,7 @@ build_lib_example(
   SOURCE_FILES pcap-example.cc
   LIBRARIES_TO_LINK
     ${libcore}
-    ${liblorawan}
+    ${libelora}
 )
 
 build_lib_example(
@@ -75,5 +75,5 @@ build_lib_example(
   SOURCE_FILES elora-example.cc
   LIBRARIES_TO_LINK
     ${libcore}
-    ${liblorawan}
+    ${libelora}
 )
