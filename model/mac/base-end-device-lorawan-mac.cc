@@ -66,14 +66,15 @@ BaseEndDeviceLorawanMac::GetTypeId()
                           BooleanValue(false),
                           MakeBooleanAccessor(&BaseEndDeviceLorawanMac::m_enableADRBackoff),
                           MakeBooleanChecker())
-            .AddAttribute("FType",
-                          "Specify type of message will be sent by this ED.",
-                          EnumValue(LorawanMacHeader::UNCONFIRMED_DATA_UP),
-                          MakeEnumAccessor(&BaseEndDeviceLorawanMac::m_fType),
-                          MakeEnumChecker(LorawanMacHeader::UNCONFIRMED_DATA_UP,
-                                          "Unconfirmed",
-                                          LorawanMacHeader::CONFIRMED_DATA_UP,
-                                          "Confirmed"))
+            .AddAttribute(
+                "FType",
+                "Specify type of message will be sent by this ED.",
+                EnumValue(LorawanMacHeader::UNCONFIRMED_DATA_UP),
+                MakeEnumAccessor<LorawanMacHeader::FType>(&BaseEndDeviceLorawanMac::m_fType),
+                MakeEnumChecker(LorawanMacHeader::UNCONFIRMED_DATA_UP,
+                                "Unconfirmed",
+                                LorawanMacHeader::CONFIRMED_DATA_UP,
+                                "Confirmed"))
             .AddAttribute(
                 "EnableCryptography",
                 "Whether the End Device should compute the uplink Message Integrity Code, "
@@ -678,10 +679,9 @@ BaseEndDeviceLorawanMac::OnLinkAdrReq(uint8_t dataRate,
         txPowerOk = false;
     }
 
-    NS_LOG_DEBUG("Finished checking. "
-                 << "ChannelMaskOk: " << channelMaskOk << ", "
-                 << "DataRateOk: " << dataRateOk << ", "
-                 << "txPowerOk: " << txPowerOk);
+    NS_LOG_DEBUG("Finished checking. " << "ChannelMaskOk: " << channelMaskOk << ", "
+                                       << "DataRateOk: " << dataRateOk << ", "
+                                       << "txPowerOk: " << txPowerOk);
 
     // If all checks are successful, set parameters up
     //////////////////////////////////////////////////

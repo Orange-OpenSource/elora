@@ -216,11 +216,6 @@ class LoraInterferenceHelper : public Object
     void CleanOldEvents();
 
     /**
-     * Set the SIR collision matrix attribute
-     */
-    void SetIsolationMatrixAttribute(EnumValue matrix);
-
-    /**
      * A list of the events this LoraInterferenceHelper is keeping track of.
      */
     std::list<Ptr<Event>> m_events;
