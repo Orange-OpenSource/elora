@@ -24,8 +24,9 @@
 #ifndef LOGICAL_CHANNEL_H
 #define LOGICAL_CHANNEL_H
 
+#include "sub-band.h"
+
 #include "ns3/object.h"
-#include "ns3/sub-band.h"
 
 namespace ns3
 {

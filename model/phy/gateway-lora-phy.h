@@ -24,7 +24,8 @@
 #ifndef GATEWAY_LORA_PHY_H
 #define GATEWAY_LORA_PHY_H
 
-#include "ns3/lora-phy.h"
+#include "lora-phy.h"
+
 #include "ns3/traced-value.h"
 
 namespace ns3

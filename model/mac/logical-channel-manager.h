@@ -24,11 +24,12 @@
 #ifndef LOGICAL_CHANNEL_MANAGER_H
 #define LOGICAL_CHANNEL_MANAGER_H
 
-#include "ns3/logical-channel.h"
+#include "logical-channel.h"
+#include "sub-band.h"
+
 #include "ns3/nstime.h"
 #include "ns3/object.h"
 #include "ns3/packet.h"
-#include "ns3/sub-band.h"
 
 #include <iterator>
 #include <list>

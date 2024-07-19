@@ -24,8 +24,9 @@
 #ifndef GATEWAY_LORAWAN_MAC_H
 #define GATEWAY_LORAWAN_MAC_H
 
+#include "lorawan-mac.h"
+
 #include "ns3/lora-tag.h"
-#include "ns3/lorawan-mac.h"
 
 namespace ns3
 {

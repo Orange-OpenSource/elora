@@ -24,10 +24,11 @@
 #ifndef LORAWAN_HELPER_H
 #define LORAWAN_HELPER_H
 
+#include "lora-packet-tracker.h"
+#include "lora-phy-helper.h"
+#include "lorawan-mac-helper.h"
+
 #include "ns3/lora-net-device.h"
-#include "ns3/lora-packet-tracker.h"
-#include "ns3/lora-phy-helper.h"
-#include "ns3/lorawan-mac-helper.h"
 #include "ns3/net-device-container.h"
 #include "ns3/net-device.h"
 #include "ns3/node-container.h"

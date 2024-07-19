@@ -20,8 +20,9 @@
 #ifndef LORATAP_HEADER_H
 #define LORATAP_HEADER_H
 
+#include "lora-tag.h"
+
 #include "ns3/header.h"
-#include "ns3/lora-tag.h"
 
 namespace ns3
 {

@@ -24,7 +24,7 @@
 #ifndef ONE_SHOT_SENDER_H
 #define ONE_SHOT_SENDER_H
 
-#include "ns3/lora-application.h"
+#include "lora-application.h"
 
 namespace ns3
 {

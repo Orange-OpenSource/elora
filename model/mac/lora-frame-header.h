@@ -24,9 +24,10 @@
 #ifndef LORA_FRAME_HEADER_H
 #define LORA_FRAME_HEADER_H
 
+#include "lora-device-address.h"
+#include "mac-command.h"
+
 #include "ns3/header.h"
-#include "ns3/lora-device-address.h"
-#include "ns3/mac-command.h"
 
 namespace ns3
 {

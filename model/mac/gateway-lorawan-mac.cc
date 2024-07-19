@@ -23,9 +23,10 @@
 
 #include "gateway-lorawan-mac.h"
 
+#include "lora-frame-header.h"
+#include "lorawan-mac-header.h"
+
 #include "ns3/log.h"
-#include "ns3/lora-frame-header.h"
-#include "ns3/lorawan-mac-header.h"
 
 namespace ns3
 {

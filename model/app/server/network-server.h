@@ -25,15 +25,16 @@
 #ifndef NETWORK_SERVER_H
 #define NETWORK_SERVER_H
 
+#include "gateway-status.h"
+#include "network-controller.h"
+#include "network-scheduler.h"
+#include "network-status.h"
+
 #include "ns3/application.h"
 #include "ns3/class-a-end-device-lorawan-mac.h"
-#include "ns3/gateway-status.h"
 #include "ns3/log.h"
 #include "ns3/lora-device-address.h"
 #include "ns3/net-device.h"
-#include "ns3/network-controller.h"
-#include "ns3/network-scheduler.h"
-#include "ns3/network-status.h"
 #include "ns3/node-container.h"
 #include "ns3/object.h"
 #include "ns3/packet.h"

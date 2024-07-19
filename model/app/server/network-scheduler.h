@@ -24,12 +24,13 @@
 #ifndef NETWORK_SCHEDULER_H
 #define NETWORK_SCHEDULER_H
 
+#include "network-controller.h"
+#include "network-status.h"
+
 #include "ns3/core-module.h"
 #include "ns3/lora-device-address.h"
 #include "ns3/lora-frame-header.h"
 #include "ns3/lorawan-mac-header.h"
-#include "ns3/network-controller.h"
-#include "ns3/network-status.h"
 #include "ns3/object.h"
 #include "ns3/packet.h"
 

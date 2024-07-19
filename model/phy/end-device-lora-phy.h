@@ -26,8 +26,9 @@
 #ifndef END_DEVICE_LORA_PHY_H
 #define END_DEVICE_LORA_PHY_H
 
+#include "lora-phy.h"
+
 #include "ns3/lora-device-address.h"
-#include "ns3/lora-phy.h"
 #include "ns3/mobility-model.h"
 #include "ns3/net-device.h"
 #include "ns3/node.h"

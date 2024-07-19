@@ -24,8 +24,9 @@
 #ifndef NETWORK_CONTROLLER_COMPONENTS_H
 #define NETWORK_CONTROLLER_COMPONENTS_H
 
+#include "network-status.h"
+
 #include "ns3/log.h"
-#include "ns3/network-status.h"
 #include "ns3/object.h"
 #include "ns3/packet.h"
 

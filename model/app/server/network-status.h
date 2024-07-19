@@ -25,11 +25,12 @@
 #ifndef NETWORK_STATUS_H
 #define NETWORK_STATUS_H
 
+#include "end-device-status.h"
+#include "gateway-status.h"
+#include "network-scheduler.h"
+
 #include "ns3/class-a-end-device-lorawan-mac.h"
-#include "ns3/end-device-status.h"
-#include "ns3/gateway-status.h"
 #include "ns3/lora-device-address.h"
-#include "ns3/network-scheduler.h"
 
 #include <iterator>
 

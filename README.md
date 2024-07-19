@@ -2,9 +2,9 @@
 
 >**If you just want to create scenarios using the emulator, and you are not interested in tinkering with it, we refer you to a quicker installation running the [emulator image with Docker Compose](https://github.com/non-det-alle/elora-docker).**
 
-This is a traffic emulator for the [Chirpstack server stack](https://www.chirpstack.io/ "ChirpStack, open-source LoRaWAN® Network Server"). 
+This is a traffic emulator for the [Chirpstack server stack](https://www.chirpstack.io/ "ChirpStack, open-source LoRaWAN® Network Server").
 
-This software can be used to simulate in real-time multiple devices and gateways sharing a radio channel with very high flexibility in terms of possible configurations. LoRaWAN traffic is then UDP-encapsulated by gateways and forwarded outside the simulation. If a Chirpstack network server is in place, it will think the traffic is coming from a real network. All Class A MAC primitives used in the UE868 region are supported: radio transmission parameters of simulated devices can be changed by the downlink LoRaWAN traffic of the real server. 
+This software can be used to simulate in real-time multiple devices and gateways sharing a radio channel with very high flexibility in terms of possible configurations. LoRaWAN traffic is then UDP-encapsulated by gateways and forwarded outside the simulation. If a Chirpstack network server is in place, it will think the traffic is coming from a real network. All Class A MAC primitives used in the UE868 region are supported: radio transmission parameters of simulated devices can be changed by the downlink LoRaWAN traffic of the real server.
 
 The code is an extension of the ns-3 [LoRaWAN module](https://github.com/signetlabdei/lorawan "LoRaWAN ns-3 module"). In addition to what is provided by the original LoRaWAN module, the following changes/additions were made:
 
@@ -49,7 +49,7 @@ The `elora` module extends the code of the original `lorawan` ns-3 module, thus 
 
 The module includes the following example:
 
-- `elora-example`
+* `elora-example`
 
 Examples can be run via the `./ns3 run --enable-sudo "elora-example [options]"` command.
 
@@ -61,9 +61,9 @@ For a description of the module, refer to `doc/lorawan.rst` (currently not up to
 
 For more information on how to use the underlying LoRaWAN module refer also to the [original module readme](https://github.com/signetlabdei/lorawan/blob/e8f7a21044418e92759d5c7c4bcab147cdaf05b3/README.md "LoRaWAN ns-3 module README").
 
-- [ns-3 tutorial](https://www.nsnam.org/docs/tutorial/html "ns-3 Tutorial")
-- [ns-3 manual](https://www.nsnam.org/docs/manual/html "ns-3 Manual")
-- The LoRaWAN specification can be found on the [LoRa Alliance
+* [ns-3 tutorial](https://www.nsnam.org/docs/tutorial/html "ns-3 Tutorial")
+* [ns-3 manual](https://www.nsnam.org/docs/manual/html "ns-3 Manual")
+* The LoRaWAN specification can be found on the [LoRa Alliance
   website](http://www.lora-alliance.org)
 
 ## License ##
@@ -76,4 +76,5 @@ that is used by ns-3). See the LICENSE.md file for more details.
 If you need any help, feel free to open an issue here.
 
 ## Cite us ##
+
 [A. Aimi, S. Rovedakis, F. Guillemin, and S. Secci, “ELoRa: End-to-end Emulation of Massive IoT LoRaWAN Infrastructures,” 2023 IEEE/IFIP Network Operations and Management Symposium (NOMS), May 2023, Miami, FL, United States.](https://hal.science/hal-04025834)

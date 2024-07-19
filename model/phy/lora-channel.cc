@@ -23,7 +23,8 @@
 
 #include "lora-channel.h"
 
-#include "ns3/end-device-lora-phy.h"
+#include "end-device-lora-phy.h"
+
 #include "ns3/pointer.h"
 #include "ns3/simulator.h"
 

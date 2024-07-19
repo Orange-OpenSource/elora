@@ -24,8 +24,9 @@
 #ifndef LORA_PHY_H
 #define LORA_PHY_H
 
-#include "ns3/lora-channel.h"
-#include "ns3/lora-interference-helper.h"
+#include "lora-channel.h"
+#include "lora-interference-helper.h"
+
 #include "ns3/mobility-model.h"
 #include "ns3/net-device.h"
 
