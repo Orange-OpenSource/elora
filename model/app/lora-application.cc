@@ -109,7 +109,7 @@ bool
 LoraApplication::IsRunning()
 {
     NS_LOG_FUNCTION(this);
-    return m_sendEvent.IsRunning();
+    return m_sendEvent.IsPending();
 }
 
 void

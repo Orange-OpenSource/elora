@@ -793,7 +793,7 @@ UdpForwarder::ThreadUp()
 void
 UdpForwarder::ReceiveAck(Ptr<Socket> sockUp)
 {
-    if (!m_remainingRecvAckAttempts or !m_upEvent.IsRunning())
+    if (!m_remainingRecvAckAttempts or !m_upEvent.IsPending())
     {
         return;
     }
