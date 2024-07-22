@@ -444,10 +444,9 @@ UdpForwarder::ThreadUp()
             meas_nb_rx_ok += 1;
 #ifdef NS3_LOG_ENABLE
             {
-                uint8_t buf_len = 100;
-                char buf[buf_len];
+                char buf[100];
                 snprintf(buf,
-                         buf_len,
+                         sizeof buf,
                          "Received pkt from mote: %08X (fcnt=%u)",
                          mote_addr,
                          mote_fcnt);

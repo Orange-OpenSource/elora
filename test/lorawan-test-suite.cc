@@ -1303,7 +1303,16 @@ class PhyConnectivityTest : public TestCase
     void Interference(Ptr<const Packet> packet, uint32_t node);
     void WrongFrequency(Ptr<const Packet> packet, uint32_t node);
     void WrongSf(Ptr<const Packet> packet, uint32_t node);
-    bool HaveSamePacketContents(Ptr<Packet> packet1, Ptr<Packet> packet2);
+
+    /**
+     * Compare two packets to check if they are equal.
+     *
+     * \param packet1 A first packet.
+     * \param packet2 A second packet.
+     * \return True if their unique identifiers are equal,
+     * \return false otherwise.
+     */
+    bool IsSamePacket(Ptr<Packet> packet1, Ptr<Packet> packet2);
 
   private:
     void DoRun() override;
@@ -1375,32 +1384,9 @@ PhyConnectivityTest::WrongFrequency(Ptr<const Packet> packet, uint32_t node)
 }
 
 bool
-PhyConnectivityTest::HaveSamePacketContents(Ptr<Packet> packet1, Ptr<Packet> packet2)
+PhyConnectivityTest::IsSamePacket(Ptr<Packet> packet1, Ptr<Packet> packet2)
 {
-    NS_LOG_FUNCTION(packet1 << packet2);
-
-    uint32_t size1 = packet1->GetSerializedSize();
-    uint8_t buffer1[size1];
-    packet1->Serialize(buffer1, size1);
-
-    uint32_t size2 = packet2->GetSerializedSize();
-    uint8_t buffer2[size2];
-    packet2->Serialize(buffer2, size2);
-
-    NS_ASSERT(size1 == size2);
-
-    bool foundADifference = false;
-    for (uint32_t i = 0; i < size1; i++)
-    {
-        NS_LOG_DEBUG(unsigned(buffer1[i]) << " " << unsigned(buffer2[i]));
-        if (buffer1[i] != buffer2[i])
-        {
-            foundADifference = true;
-            break;
-        }
-    }
-
-    return !foundADifference;
+    return packet1->GetUid() == packet2->GetUid();
 }
 
 void
@@ -1703,7 +1689,7 @@ PhyConnectivityTest::DoRun()
     Simulator::Stop(Hours(2));
     Simulator::Run();
 
-    NS_TEST_EXPECT_MSG_EQ(HaveSamePacketContents(packet, m_latestReceivedPacket),
+    NS_TEST_EXPECT_MSG_EQ(IsSamePacket(packet, m_latestReceivedPacket),
                           true,
                           "Packet changed contents when going through the channel");
 
