@@ -31,6 +31,8 @@ namespace ns3
 namespace lorawan
 {
 
+using namespace energy;
+
 /**
  * \ingroup energy
  */

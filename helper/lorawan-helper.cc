@@ -410,7 +410,7 @@ LorawanHelper::DoPrintSFStatus(NodeContainer endDevices,
         sfstat.totAggDC += ot;
 
         // Total energy consumed
-        if (auto esc = node->GetObject<EnergySourceContainer>())
+        if (auto esc = node->GetObject<energy::EnergySourceContainer>())
         {
             auto demc = esc->Get(0)->FindDeviceEnergyModels("ns3::LoraRadioEnergyModel");
             if (demc.GetN())
