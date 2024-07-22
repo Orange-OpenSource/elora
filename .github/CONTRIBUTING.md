@@ -20,7 +20,7 @@ guidelines:
 2. Make sure that unit tests pass
 3. Write tests for the new behavior
 4. Make sure the code is documented and styled according to the [ns-3
-   guidelines](https://www.nsnam.org/developers/contributing-code/coding-style
+   guidelines](https://www.nsnam.org/docs/contributing/html/coding-style.html
    "ns-3 documentation and style guidelines")
 5. Write an example illustrating how to use the new feature
 6. Update the documentation in the `doc/lorawan.rst` file
