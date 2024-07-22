@@ -23,7 +23,7 @@ Maintainer: Michael Coracin
 #define DEBUG_TIMERSYNC 0
 #define DEBUG_LOG       1
 
-#define MSG(args...) printf(args) /* message that is destined to the user */
+#define MSG(...) printf(__VA_ARGS__) /* message that is destined to the user */
 #define MSG_DEBUG(FLAG, fmt, ...)                                                                         \
             do  {                                                                                         \
                 if (FLAG)                                                                                 \
