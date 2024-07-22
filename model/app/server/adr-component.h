@@ -102,15 +102,6 @@ class AdrComponent : public NetworkControllerComponent
     // Maximum transmission power (dBm e.r.p) (Europe)
     const int max_transmissionPower = 14;
 
-    // Device specific SNR margin (dB)
-    //  const int offset = 10;
-
-    // Bandwidth (Hz)
-    const int B = 125000;
-
-    // Noise Figure (dB)
-    const int NF = 6;
-
     // Vector containing the required SNR for the 6 allowed SF levels
     // ranging from 7 to 12 (the SNR values are in dB).
     double treshold[6] = {-20.0, -17.5, -15.0, -12.5, -10.0, -7.5};
