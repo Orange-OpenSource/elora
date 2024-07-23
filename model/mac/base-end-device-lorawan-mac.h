@@ -27,12 +27,13 @@
 #ifndef END_DEVICE_LORAWAN_MAC_H
 #define END_DEVICE_LORAWAN_MAC_H
 
+#include "lora-device-address.h"
+#include "lora-frame-header.h"
+#include "lorawan-mac-header.h"
+#include "lorawan-mac.h"
+#include "mac-command.h"
+
 #include "ns3/LoRaMacCrypto.h"
-#include "ns3/lora-device-address.h"
-#include "ns3/lora-frame-header.h"
-#include "ns3/lorawan-mac-header.h"
-#include "ns3/lorawan-mac.h"
-#include "ns3/mac-command.h"
 #include "ns3/traced-value.h"
 
 #define ADR_ACK_LIMIT 64

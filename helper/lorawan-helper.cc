@@ -57,7 +57,7 @@ LorawanHelper::Install(const LoraPhyHelper& phyHelper,
                        NodeContainer c) const
 {
     NetDeviceContainer devices;
-    for (NodeContainer::Iterator i = c.Begin(); i != c.End(); ++i)
+    for (auto i = c.Begin(); i != c.End(); ++i)
     {
         Ptr<Node> node = *i;
         Ptr<LoraNetDevice> device = CreateObject<LoraNetDevice>();
@@ -190,7 +190,7 @@ LorawanHelper::DoPrintDeviceStatus(NodeContainer endDevices,
     DevPktCount devPktCount;
     m_packetTracker->CountAllDevicesPackets(m_lastDeviceStatusUpdate, currentTime, devPktCount);
 
-    for (NodeContainer::Iterator j = endDevices.Begin(); j != endDevices.End(); ++j)
+    for (auto j = endDevices.Begin(); j != endDevices.End(); ++j)
     {
         auto node = *j;
         auto position = node->GetObject<MobilityModel>();
@@ -379,7 +379,7 @@ LorawanHelper::DoPrintSFStatus(NodeContainer endDevices,
     using sfMap_t = std::map<int, sfStatus_t>;
     sfMap_t sfmap;
 
-    for (NodeContainer::Iterator j = endDevices.Begin(); j != endDevices.End(); ++j)
+    for (auto j = endDevices.Begin(); j != endDevices.End(); ++j)
     {
         // Obtain device information
         auto node = *j;
@@ -410,7 +410,7 @@ LorawanHelper::DoPrintSFStatus(NodeContainer endDevices,
         sfstat.totAggDC += ot;
 
         // Total energy consumed
-        if (auto esc = node->GetObject<EnergySourceContainer>())
+        if (auto esc = node->GetObject<energy::EnergySourceContainer>())
         {
             auto demc = esc->Get(0)->FindDeviceEnergyModels("ns3::LoraRadioEnergyModel");
             if (demc.GetN())
@@ -421,9 +421,11 @@ LorawanHelper::DoPrintSFStatus(NodeContainer endDevices,
     }
 
     for (const auto& sf : sfmap)
+    {
         outputFile << currentTime.GetSeconds() << " " << sf.first << " " << sf.second.sent << " "
                    << sf.second.received << " " << sf.second.totMaxOT << " " << sf.second.totAggDC
                    << " " << sf.second.totEnergy << std::endl;
+    }
 
     m_lastSFStatusUpdate = Simulator::Now();
     outputFile.close();
@@ -439,7 +441,9 @@ LorawanHelper::EnablePrinting(NodeContainer endDevices,
     for (auto l : levels)
     {
         if (active[l])
+        {
             continue;
+        }
         switch (l)
         {
         case NET:

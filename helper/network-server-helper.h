@@ -84,10 +84,6 @@ class NetworkServerHelper
 
     bool m_adrEnabled;
 
-    bool m_ccEnabled;
-
-    bool m_rlEnabled;
-
     ObjectFactory m_adrSupportFactory;
 };
 

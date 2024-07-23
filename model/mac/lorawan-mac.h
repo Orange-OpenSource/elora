@@ -24,7 +24,8 @@
 #ifndef LORAWAN_MAC_H
 #define LORAWAN_MAC_H
 
-#include "ns3/logical-channel-manager.h"
+#include "logical-channel-manager.h"
+
 #include "ns3/lora-phy.h"
 #include "ns3/object.h"
 #include "ns3/packet.h"

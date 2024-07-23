@@ -24,9 +24,10 @@
 #ifndef ADR_COMPONENT_H
 #define ADR_COMPONENT_H
 
+#include "network-controller-components.h"
+#include "network-status.h"
+
 #include "ns3/log.h"
-#include "ns3/network-controller-components.h"
-#include "ns3/network-status.h"
 #include "ns3/object.h"
 #include "ns3/packet.h"
 
@@ -100,15 +101,6 @@ class AdrComponent : public NetworkControllerComponent
 
     // Maximum transmission power (dBm e.r.p) (Europe)
     const int max_transmissionPower = 14;
-
-    // Device specific SNR margin (dB)
-    //  const int offset = 10;
-
-    // Bandwidth (Hz)
-    const int B = 125000;
-
-    // Noise Figure (dB)
-    const int NF = 6;
 
     // Vector containing the required SNR for the 6 allowed SF levels
     // ranging from 7 to 12 (the SNR values are in dB).

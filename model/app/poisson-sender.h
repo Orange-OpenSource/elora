@@ -21,7 +21,7 @@
 #ifndef POISSON_SENDER_H
 #define POISSON_SENDER_H
 
-#include "ns3/lora-application.h"
+#include "lora-application.h"
 
 namespace ns3
 {

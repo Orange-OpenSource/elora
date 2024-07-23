@@ -123,7 +123,7 @@ RangePositionAllocator::SetZ(Ptr<RandomVariableStream> z)
 void
 RangePositionAllocator::SetNodes(NodeContainer nodes)
 {
-    for (NodeContainer::Iterator i = nodes.Begin(); i != nodes.End(); ++i)
+    for (auto i = nodes.Begin(); i != nodes.End(); ++i)
     {
         m_nodes.push_back(*i);
     }
@@ -140,7 +140,9 @@ RangePositionAllocator::OutOfRange(double x, double y, double z) const
         double dist = i->GetObject<MobilityModel>()->GetDistanceFrom(pos);
 
         if (dist <= 1.0)
+        {
             return true;
+        }
 
         if (dist < m_range)
         {

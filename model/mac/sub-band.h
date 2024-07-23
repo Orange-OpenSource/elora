@@ -24,7 +24,8 @@
 #ifndef SUB_BAND_H
 #define SUB_BAND_H
 
-#include "ns3/logical-channel.h"
+#include "logical-channel.h"
+
 #include "ns3/nstime.h"
 #include "ns3/object.h"
 

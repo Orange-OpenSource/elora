@@ -127,17 +127,13 @@ LoraInterferenceHelper::GetTypeId()
             .SetParent<Object>()
             .SetGroupName("lorawan")
             .AddConstructor<LoraInterferenceHelper>()
-            .AddAttribute("IsolationMatrix",
-                          "Signal to Interference Ratio (SIR) matrix used to determine "
-                          "if a packet is destroyed by interference on collision event",
-                          EnumValue(IsolationMatrix::CROCE),
-                          MakeEnumAccessor(&LoraInterferenceHelper::SetIsolationMatrixAttribute),
-                          MakeEnumChecker(IsolationMatrix::CROCE,
-                                          "CROCE",
-                                          IsolationMatrix::GOURSAUD,
-                                          "GOURSAUD",
-                                          IsolationMatrix::ALOHA,
-                                          "ALOHA"));
+            .AddAttribute(
+                "IsolationMatrix",
+                "Signal to Interference Ratio (SIR) matrix used to determine "
+                "if a packet is destroyed by interference on collision event",
+                EnumValue(CROCE),
+                MakeEnumAccessor<IsolationMatrix>(&LoraInterferenceHelper::SetIsolationMatrix),
+                MakeEnumChecker(CROCE, "CROCE", GOURSAUD, "GOURSAUD", ALOHA, "ALOHA"));
 
     return tid;
 }
@@ -357,12 +353,6 @@ LoraInterferenceHelper::SetIsolationMatrix(IsolationMatrix matrix)
         m_isolationMatrix = LoraInterferenceHelper::m_CROCE;
         break;
     }
-}
-
-void
-LoraInterferenceHelper::SetIsolationMatrixAttribute(EnumValue matrix)
-{
-    SetIsolationMatrix((IsolationMatrix)matrix.Get());
 }
 
 const Time LoraInterferenceHelper::m_oldEventThreshold = Seconds(2);

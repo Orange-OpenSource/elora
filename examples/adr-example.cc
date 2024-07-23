@@ -243,7 +243,7 @@ main(int argc, char* argv[])
     // Do not set spreading factors up: we will wait for the NS to do this
     if (initializeSF)
     {
-        macHelper.SetSpreadingFactorsUp(endDevices, gateways, channel);
+        LorawanMacHelper::SetSpreadingFactorsUp(endDevices, gateways, channel);
     }
 
     ////////////

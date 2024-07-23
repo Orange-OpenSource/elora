@@ -29,8 +29,8 @@ Maintainer: Sylvain Miermont
 #define ARRAY_SIZE(a)       (sizeof(a) / sizeof((a)[0]))
 #define CRIT(a)             fprintf(stderr, "\nCRITICAL file:%s line:%u msg:%s\n", __FILE__, __LINE__,a);exit(EXIT_FAILURE)
 
-//#define DEBUG(args...)    fprintf(stderr,"debug: " args) /* diagnostic message that is destined to the user */
-#define DEBUG(args...)
+//#define DEBUG(...)    fprintf(stderr,"debug: " __VA_ARGS__) /* diagnostic message that is destined to the user */
+#define DEBUG(...)
 
 /* -------------------------------------------------------------------------- */
 /* --- PRIVATE CONSTANTS ---------------------------------------------------- */

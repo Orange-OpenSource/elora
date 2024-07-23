@@ -3,6 +3,8 @@
  * Key elements are preceded by a comment with lots of dashes ( ///////////// )
  */
 
+#include "utilities.cc"
+
 // ns3 imports
 #include "ns3/core-module.h"
 #include "ns3/csma-helper.h"
@@ -29,8 +31,7 @@
 using namespace ns3;
 using namespace lorawan;
 
-NS_LOG_COMPONENT_DEFINE("EloraExample");
-#include "utilities.cc"
+NS_LOG_COMPONENT_DEFINE_EXAMPLE_WITH_UTILITIES("EloraExample");
 
 /* Global declaration of connection helper for signal handling */
 ChirpstackHelper csHelper;
@@ -47,8 +48,8 @@ main(int argc, char* argv[])
     uint16_t apiPort = 8090;
     std::string token =
         "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9."
-        "eyJhdWQiOiJjaGlycHN0YWNrIiwiaXNzIjoiY2hpcnBzdGFjayIsInN1YiI6IjZlMjQ4NjljLWQxMjItNDZkOS04Nz"
-        "E0LTM5Yzc4Nzg4OTRhZCIsInR5cCI6ImtleSJ9.IB20o6Jrcwj5qZ9mPEuthzzqMyc3YNSl8by_ZXrjqhw";
+        "eyJhdWQiOiJjaGlycHN0YWNrIiwiaXNzIjoiY2hpcnBzdGFjayIsInN1YiI6ImQ2ZGQ4OGFiLTNmN2MtNGJlZi1hZW"
+        "U1LWVmZGRkNWEyZmE3MSIsInR5cCI6ImtleSJ9.UJmVOv2Chbh1T5xjUSBF9jZuGmmLg3xu7Dg_77otxkA";
     uint16_t destPort = 1700;
 
     double periods = 24; // H * D
@@ -88,6 +89,8 @@ main(int argc, char* argv[])
     GlobalValue::Bind("ChecksumEnabled", BooleanValue(true));
     Config::SetDefault("ns3::BaseEndDeviceLorawanMac::ADRBackoff", BooleanValue(true));
     Config::SetDefault("ns3::BaseEndDeviceLorawanMac::EnableCryptography", BooleanValue(true));
+    Config::SetDefault("ns3::BaseEndDeviceLorawanMac::FType",
+                       EnumValue(LorawanMacHeader::CONFIRMED_DATA_UP));
     ///////////////// Needed to manage the variance introduced by real world interaction
     Config::SetDefault("ns3::ClassAEndDeviceLorawanMac::RecvWinSymb", UintegerValue(16));
 

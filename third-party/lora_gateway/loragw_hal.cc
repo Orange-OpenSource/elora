@@ -30,7 +30,7 @@ Maintainer: Sylvain Miermont
 #define ARRAY_SIZE(a) (sizeof (a) / sizeof ((a)[0]))
 #if DEBUG_HAL == 1
 #define DEBUG_MSG(str) fprintf (stderr, str)
-#define DEBUG_PRINTF(fmt, args...) fprintf (stderr, "%s:%d: " fmt, __FUNCTION__, __LINE__, args)
+#define DEBUG_PRINTF(fmt, ...) fprintf (stderr, "%s:%d: " fmt, __FUNCTION__, __LINE__, __VA_ARGS__)
 #define DEBUG_ARRAY(a, b, c)       \
   for (a = 0; a < b; ++a)          \
     fprintf (stderr, "%x.", c[a]); \
@@ -43,7 +43,7 @@ Maintainer: Sylvain Miermont
     }
 #else
 #define DEBUG_MSG(str)
-#define DEBUG_PRINTF(fmt, args...)
+#define DEBUG_PRINTF(fmt, ...)
 #define DEBUG_ARRAY(a, b, c) \
   for (a = 0; a != 0;)       \
     {                        \

@@ -154,7 +154,7 @@ main(int argc, char* argv[])
     helper.Install(phyHelper, macHelper, gateways);
 
     // Set spreading factors up
-    macHelper.SetSpreadingFactorsUp(endDevices, gateways, channel);
+    LorawanMacHelper::SetSpreadingFactorsUp(endDevices, gateways, channel);
 
     ////////////
     // Create NS

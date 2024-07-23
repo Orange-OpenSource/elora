@@ -27,9 +27,10 @@
 #ifndef LORA_CHANNEL_H
 #define LORA_CHANNEL_H
 
+#include "lora-phy.h"
+
 #include "ns3/channel.h"
 #include "ns3/log.h"
-#include "ns3/lora-phy.h"
 #include "ns3/mobility-model.h"
 #include "ns3/nstime.h"
 #include "ns3/packet.h"

@@ -24,7 +24,7 @@
 #ifndef PERIODIC_SENDER_H
 #define PERIODIC_SENDER_H
 
-#include "ns3/lora-application.h"
+#include "lora-application.h"
 
 namespace ns3
 {

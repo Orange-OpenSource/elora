@@ -66,14 +66,15 @@ BaseEndDeviceLorawanMac::GetTypeId()
                           BooleanValue(false),
                           MakeBooleanAccessor(&BaseEndDeviceLorawanMac::m_enableADRBackoff),
                           MakeBooleanChecker())
-            .AddAttribute("FType",
-                          "Specify type of message will be sent by this ED.",
-                          EnumValue(LorawanMacHeader::UNCONFIRMED_DATA_UP),
-                          MakeEnumAccessor(&BaseEndDeviceLorawanMac::m_fType),
-                          MakeEnumChecker(LorawanMacHeader::UNCONFIRMED_DATA_UP,
-                                          "Unconfirmed",
-                                          LorawanMacHeader::CONFIRMED_DATA_UP,
-                                          "Confirmed"))
+            .AddAttribute(
+                "FType",
+                "Specify type of message will be sent by this ED.",
+                EnumValue(LorawanMacHeader::UNCONFIRMED_DATA_UP),
+                MakeEnumAccessor<LorawanMacHeader::FType>(&BaseEndDeviceLorawanMac::m_fType),
+                MakeEnumChecker(LorawanMacHeader::UNCONFIRMED_DATA_UP,
+                                "Unconfirmed",
+                                LorawanMacHeader::CONFIRMED_DATA_UP,
+                                "Confirmed"))
             .AddAttribute(
                 "EnableCryptography",
                 "Whether the End Device should compute the uplink Message Integrity Code, "
@@ -126,8 +127,8 @@ BaseEndDeviceLorawanMac::BaseEndDeviceLorawanMac()
       // Private Header fields
       m_fType(LorawanMacHeader::UNCONFIRMED_DATA_UP),
       m_address(LoraDeviceAddress(0)),
-      m_ADRBit(0),
-      m_ADRACKReq(0),
+      m_ADRBit(false),
+      m_ADRACKReq(false),
       m_fCnt(0),
       // Private MAC layer settings
       m_enableADRBackoff(false),
@@ -303,7 +304,7 @@ BaseEndDeviceLorawanMac::ExecuteADRBackoff()
     // ADR backoff as in LoRaWAN specification, V1.0.4 (2020)
     if (m_ADRACKCnt == ADR_ACK_LIMIT)
     {
-        m_ADRACKReq = 1; // Set the ADRACKReq bit in frame header
+        m_ADRACKReq = true; // Set the ADRACKReq bit in frame header
     }
     else if (m_ADRACKCnt == ADR_ACK_LIMIT + ADR_ACK_DELAY)
     {
@@ -342,10 +343,14 @@ BaseEndDeviceLorawanMac::GetChannelForTx()
 
         // Send immediately if we can
         if (waitingTime == Seconds(0))
+        {
             return llc;
+        }
         else
+        {
             NS_LOG_DEBUG("Packet cannot be immediately transmitted on "
                          << "the current channel because of duty cycle limitations.");
+        }
     }
     return nullptr; // In this case, no suitable channel was found
 }
@@ -623,11 +628,13 @@ BaseEndDeviceLorawanMac::OnLinkAdrReq(uint8_t dataRate,
     /////////////////////////
     // Check whether all specified channels exist on this device
     for (auto& chIndex : enabledChannels)
+    {
         if (!m_channelManager->GetChannel(chIndex))
         {
             channelMaskOk = false;
             break;
         }
+    }
 
     // Check the dataRate
     /////////////////////
@@ -678,10 +685,9 @@ BaseEndDeviceLorawanMac::OnLinkAdrReq(uint8_t dataRate,
         txPowerOk = false;
     }
 
-    NS_LOG_DEBUG("Finished checking. "
-                 << "ChannelMaskOk: " << channelMaskOk << ", "
-                 << "DataRateOk: " << dataRateOk << ", "
-                 << "txPowerOk: " << txPowerOk);
+    NS_LOG_DEBUG("Finished checking. " << "ChannelMaskOk: " << channelMaskOk << ", "
+                                       << "DataRateOk: " << dataRateOk << ", "
+                                       << "txPowerOk: " << txPowerOk);
 
     // If all checks are successful, set parameters up
     //////////////////////////////////////////////////
@@ -715,7 +721,7 @@ BaseEndDeviceLorawanMac::OnLinkAdrReq(uint8_t dataRate,
 
     // Craft a LinkAdrAns MAC command as a response
     ///////////////////////////////////////////////
-    m_fOpts.push_back(Create<LinkAdrAns>(txPowerOk, dataRateOk, channelMaskOk));
+    m_fOpts.emplace_back(Create<LinkAdrAns>(txPowerOk, dataRateOk, channelMaskOk));
 }
 
 void
@@ -731,7 +737,7 @@ BaseEndDeviceLorawanMac::OnDutyCycleReq(double dutyCycle)
 
     // Craft a DutyCycleAns as response
     NS_LOG_INFO("Adding DutyCycleAns reply");
-    m_fOpts.push_back(Create<DutyCycleAns>());
+    m_fOpts.emplace_back(Create<DutyCycleAns>());
 }
 
 void
@@ -744,7 +750,7 @@ BaseEndDeviceLorawanMac::OnDevStatusReq()
 
     // Craft a RxParamSetupAns as response
     NS_LOG_INFO("Adding DevStatusAns reply");
-    m_fOpts.push_back(Create<DevStatusAns>(battery, margin));
+    m_fOpts.emplace_back(Create<DevStatusAns>(battery, margin));
 }
 
 void
@@ -767,7 +773,7 @@ BaseEndDeviceLorawanMac::OnNewChannelReq(uint8_t chIndex,
     }
 
     NS_LOG_INFO("Adding NewChannelAns reply");
-    m_fOpts.push_back(Create<NewChannelAns>(dataRateRangeOk, channelFrequencyOk));
+    m_fOpts.emplace_back(Create<NewChannelAns>(dataRateRangeOk, channelFrequencyOk));
 }
 
 void
@@ -787,7 +793,7 @@ BaseEndDeviceLorawanMac::OnDlChannelReq(uint8_t chIndex, double frequency)
     }
 
     NS_LOG_INFO("Adding DlChannelAns reply");
-    m_fOpts.push_back(Create<DlChannelAns>(uplinkFrequencyExists, channelFrequencyOk));
+    m_fOpts.emplace_back(Create<DlChannelAns>(uplinkFrequencyExists, channelFrequencyOk));
 }
 
 /////////////////////////

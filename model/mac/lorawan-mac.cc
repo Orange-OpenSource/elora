@@ -86,7 +86,7 @@ LorawanMac::GetTSym(uint8_t dr)
 {
     uint8_t sf = GetSfFromDataRate(dr);
     double bandwidth = GetBandwidthFromDataRate(dr);
-    return LoraPhy::GetTSym({sf, 0, 0, bandwidth, 0, 0, 0});
+    return LoraPhy::GetTSym({sf, false, 0, bandwidth, 0, false, false});
 }
 
 void

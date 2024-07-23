@@ -15,6 +15,27 @@
 using namespace ns3;
 using namespace lorawan;
 
+NS_LOG_COMPONENT_DEFINE("Utilities");
+
+bool
+RedefineLogComponent(const std::string& name, const std::string& file)
+{
+    auto components = LogComponent::GetComponentList();
+    g_log = LogComponent(name, file); // Move constructor!
+    (*components)[name] = &g_log;
+    return components->erase("Utilities");
+}
+
+/**
+ * Use this macro on top of a main simulation file to specify a logging
+ * component that enables NS_LOG macros in both the main example file and
+ * utilities.cc. A tipical use case for this is when callbacks or other
+ * auxiliary functions are defined in utilities.cc, and you still want them
+ * to print logs as if they had been declared in the main simulation file.
+ */
+#define NS_LOG_COMPONENT_DEFINE_EXAMPLE_WITH_UTILITIES(name)                                       \
+    [[maybe_unused]] bool _ = RedefineLogComponent(name, __FILE__)
+
 /**
  * \brief Computes total deployment area
  *
@@ -85,7 +106,6 @@ OnInterrupt(sighandler_t action)
     std::signal(SIGILL, action);
     std::signal(SIGFPE, action);
     std::signal(SIGABRT, action);
-    std::signal(SIGFPE, action);
     std::signal(SIGTERM, action);
 }
 

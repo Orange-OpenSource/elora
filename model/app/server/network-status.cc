@@ -24,8 +24,9 @@
 
 #include "network-status.h"
 
-#include "ns3/end-device-status.h"
-#include "ns3/gateway-status.h"
+#include "end-device-status.h"
+#include "gateway-status.h"
+
 #include "ns3/log.h"
 #include "ns3/lora-device-address.h"
 #include "ns3/net-device.h"
@@ -218,7 +219,7 @@ NetworkStatus::GetEndDeviceStatus(Ptr<const Packet> packet)
     else
     {
         NS_LOG_ERROR("EndDeviceStatus not found");
-        return 0;
+        return nullptr;
     }
 }
 
@@ -235,7 +236,7 @@ NetworkStatus::GetEndDeviceStatus(LoraDeviceAddress address)
     else
     {
         NS_LOG_ERROR("EndDeviceStatus not found");
-        return 0;
+        return nullptr;
     }
 }
 

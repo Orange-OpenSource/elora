@@ -373,7 +373,7 @@ EndDeviceStatus::AddMACCommand(Ptr<MacCommand> macCommand)
 bool
 EndDeviceStatus::HasReceiveWindowOpportunityScheduled()
 {
-    return m_receiveWindowEvent.IsRunning();
+    return m_receiveWindowEvent.IsPending();
 }
 
 void
@@ -430,8 +430,7 @@ operator<<(std::ostream& os, const EndDeviceStatus& status)
         EndDeviceStatus::GatewayList gatewayList = info.gwList;
         Ptr<const Packet> pkt = (*j).first;
         os << pkt << " " << gatewayList.size() << std::endl;
-        for (EndDeviceStatus::GatewayList::iterator k = gatewayList.begin(); k != gatewayList.end();
-             k++)
+        for (auto k = gatewayList.begin(); k != gatewayList.end(); k++)
         {
             EndDeviceStatus::PacketInfoPerGw infoPerGw = (*k).second;
             os << "  " << infoPerGw.gwAddress << " " << infoPerGw.rxPower << std::endl;

@@ -24,6 +24,8 @@
 
 #include "network-server.h"
 
+#include "network-status.h"
+
 #include "ns3/class-a-end-device-lorawan-mac.h"
 #include "ns3/lora-device-address.h"
 #include "ns3/lora-frame-header.h"
@@ -31,7 +33,6 @@
 #include "ns3/lorawan-mac-header.h"
 #include "ns3/mac-command.h"
 #include "ns3/net-device.h"
-#include "ns3/network-status.h"
 #include "ns3/node-container.h"
 #include "ns3/packet.h"
 #include "ns3/point-to-point-net-device.h"
@@ -91,7 +92,7 @@ NetworkServer::AddGateway(Ptr<Node> gateway, Ptr<NetDevice> netDevice)
 {
     NS_LOG_FUNCTION(this << gateway);
     // Get the PointToPointNetDevice
-    Ptr<PointToPointNetDevice> p2pNetDevice = 0;
+    Ptr<PointToPointNetDevice> p2pNetDevice = nullptr;
     for (uint32_t i = 0; i < gateway->GetNDevices(); i++)
     {
         if (p2pNetDevice = DynamicCast<PointToPointNetDevice>(gateway->GetDevice(i));
