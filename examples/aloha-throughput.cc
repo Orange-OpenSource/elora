@@ -1,3 +1,5 @@
+#include "utilities.cc"
+
 #include "ns3/base-end-device-lorawan-mac.h"
 #include "ns3/building-allocator.h"
 #include "ns3/building-penetration-loss.h"
@@ -33,8 +35,7 @@
 using namespace ns3;
 using namespace lorawan;
 
-NS_LOG_COMPONENT_DEFINE("AlohaThroughput");
-#include "utilities.cc"
+NS_LOG_COMPONENT_DEFINE_EXAMPLE_WITH_UTILITIES("AlohaThroughput");
 
 // Network settings
 int nDevices = 200;

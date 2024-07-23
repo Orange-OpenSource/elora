@@ -3,6 +3,8 @@
  * Key elements are preceded by a comment with lots of dashes ( ///////////// )
  */
 
+#include "utilities.cc"
+
 // ns3 imports
 #include "ns3/core-module.h"
 #include "ns3/csma-helper.h"
@@ -29,8 +31,7 @@
 using namespace ns3;
 using namespace lorawan;
 
-NS_LOG_COMPONENT_DEFINE("EloraExample");
-#include "utilities.cc"
+NS_LOG_COMPONENT_DEFINE_EXAMPLE_WITH_UTILITIES("EloraExample");
 
 /* Global declaration of connection helper for signal handling */
 ChirpstackHelper csHelper;
