@@ -1,18 +1,7 @@
 /*
  * Copyright (c) 2021 Alessandro Aimi
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation;
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * SPDX-License-Identifier: GPL-2.0-only
  *
  * Author: Alessandro Aimi <alessandro.aimi@orange.com>
  *                         <alessandro.aimi@cnam.fr>
@@ -804,12 +793,12 @@ UdpForwarder::ReceiveAck(Ptr<Socket> sockUp)
     clock_gettime(CLOCK_MONOTONIC, &m_upRecvTime);
     if ((j < 4) || (buff_ack[0] != PROTOCOL_VERSION) || (buff_ack[3] != PKT_PUSH_ACK))
     {
-        NS_LOG_WARN ("[up] ignored invalid non-ACL packet");
+        NS_LOG_WARN("[up] ignored invalid non-ACL packet");
         m_remainingRecvAckAttempts--; /* continue; */
     }
     else if ((buff_ack[1] != m_upTokenH) || (buff_ack[2] != m_upTokenL))
     {
-        NS_LOG_WARN ("[up] ignored out-of sync ACK packet");
+        NS_LOG_WARN("[up] ignored out-of sync ACK packet");
         m_remainingRecvAckAttempts--; /* continue; */
     }
     else

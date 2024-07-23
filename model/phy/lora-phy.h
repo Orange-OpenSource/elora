@@ -1,18 +1,7 @@
 /*
  * Copyright (c) 2017 University of Padova
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation;
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * SPDX-License-Identifier: GPL-2.0-only
  *
  * Author: Davide Magrin <magrinda@dei.unipd.it>
  *
@@ -43,12 +32,12 @@ class LoraChannel;
  */
 struct LoraPhyTxParameters
 {
-    uint8_t sf = 12;                         //!< Spreading Factor
-    bool headerDisabled = false;             //!< Whether to use implicit header mode
-    uint8_t codingRate = 1;                  //!< Code rate (obtained as 4/(codingRate+4))
-    double bandwidthHz = 125000;             //!< Bandwidth in Hz
-    uint16_t nPreamble = 8;                  //!< Number of preamble symbols
-    bool crcEnabled = true;                  //!< Whether Cyclic Redundancy Check is enabled
+    uint8_t sf = 12;                             //!< Spreading Factor
+    bool headerDisabled = false;                 //!< Whether to use implicit header mode
+    uint8_t codingRate = 1;                      //!< Code rate (obtained as 4/(codingRate+4))
+    double bandwidthHz = 125000;                 //!< Bandwidth in Hz
+    uint16_t nPreamble = 8;                      //!< Number of preamble symbols
+    bool crcEnabled = true;                      //!< Whether Cyclic Redundancy Check is enabled
     bool lowDataRateOptimizationEnabled = false; //!< Whether Low Data Rate Optimization is enabled
 };
 
