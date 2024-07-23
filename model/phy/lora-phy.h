@@ -44,12 +44,12 @@ class LoraChannel;
 struct LoraPhyTxParameters
 {
     uint8_t sf = 12;                         //!< Spreading Factor
-    bool headerDisabled = 0;                 //!< Whether to use implicit header mode
+    bool headerDisabled = false;             //!< Whether to use implicit header mode
     uint8_t codingRate = 1;                  //!< Code rate (obtained as 4/(codingRate+4))
     double bandwidthHz = 125000;             //!< Bandwidth in Hz
     uint16_t nPreamble = 8;                  //!< Number of preamble symbols
-    bool crcEnabled = 1;                     //!< Whether Cyclic Redundancy Check is enabled
-    bool lowDataRateOptimizationEnabled = 0; //!< Whether Low Data Rate Optimization is enabled
+    bool crcEnabled = true;                  //!< Whether Cyclic Redundancy Check is enabled
+    bool lowDataRateOptimizationEnabled = false; //!< Whether Low Data Rate Optimization is enabled
 };
 
 /**

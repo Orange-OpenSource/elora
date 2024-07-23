@@ -167,7 +167,7 @@ main(int argc, char* argv[])
     mobility.Install(endDevices);
 
     // Make it so that nodes are at a certain height > 0
-    for (NodeContainer::Iterator j = endDevices.Begin(); j != endDevices.End(); ++j)
+    for (auto j = endDevices.Begin(); j != endDevices.End(); ++j)
     {
         Ptr<MobilityModel> mobility = (*j)->GetObject<MobilityModel>();
         Vector position = mobility->GetPosition();
@@ -190,7 +190,7 @@ main(int argc, char* argv[])
     // Now end devices are connected to the channel
 
     // Connect trace sources
-    for (NodeContainer::Iterator j = endDevices.Begin(); j != endDevices.End(); ++j)
+    for (auto j = endDevices.Begin(); j != endDevices.End(); ++j)
     {
         Ptr<Node> node = *j;
         Ptr<LoraNetDevice> loraNetDevice = DynamicCast<LoraNetDevice>(node->GetDevice(0));

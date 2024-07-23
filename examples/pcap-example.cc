@@ -112,7 +112,7 @@ main(int argc, char* argv[])
     mobility.Install(endDevices);
 
     // Make it so that nodes are at a certain height > 0
-    for (NodeContainer::Iterator j = endDevices.Begin(); j != endDevices.End(); ++j)
+    for (auto j = endDevices.Begin(); j != endDevices.End(); ++j)
     {
         Ptr<MobilityModel> mobility = (*j)->GetObject<MobilityModel>();
         Vector position = mobility->GetPosition();

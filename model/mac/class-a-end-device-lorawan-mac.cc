@@ -306,7 +306,7 @@ ClassAEndDeviceLorawanMac::OnRxParamSetupReq(Ptr<RxParamSetupReq> rxParamSetupRe
 
     // Craft a RxParamSetupAns as response
     NS_LOG_INFO("Adding RxParamSetupAns reply");
-    m_fOpts.push_back(Create<RxParamSetupAns>(offsetOk, dataRateOk, channelOk));
+    m_fOpts.emplace_back(Create<RxParamSetupAns>(offsetOk, dataRateOk, channelOk));
 }
 
 void
@@ -317,7 +317,7 @@ ClassAEndDeviceLorawanMac::OnRxTimingSetupReq(Time delay)
     m_rwm->SetRx1Delay(delay);
 
     NS_LOG_INFO("Adding RxTimingSetupAns reply");
-    m_fOpts.push_back(Create<RxTimingSetupAns>());
+    m_fOpts.emplace_back(Create<RxTimingSetupAns>());
 }
 
 /////////////////////////

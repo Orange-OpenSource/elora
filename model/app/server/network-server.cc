@@ -92,7 +92,7 @@ NetworkServer::AddGateway(Ptr<Node> gateway, Ptr<NetDevice> netDevice)
 {
     NS_LOG_FUNCTION(this << gateway);
     // Get the PointToPointNetDevice
-    Ptr<PointToPointNetDevice> p2pNetDevice = 0;
+    Ptr<PointToPointNetDevice> p2pNetDevice = nullptr;
     for (uint32_t i = 0; i < gateway->GetNDevices(); i++)
     {
         if (p2pNetDevice = DynamicCast<PointToPointNetDevice>(gateway->GetDevice(i));

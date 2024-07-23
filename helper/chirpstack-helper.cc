@@ -108,7 +108,7 @@ ChirpstackHelper::Register(Ptr<Node> node) const
 int
 ChirpstackHelper::Register(NodeContainer c) const
 {
-    for (NodeContainer::Iterator i = c.Begin(); i != c.End(); ++i)
+    for (auto i = c.Begin(); i != c.End(); ++i)
     {
         if (RegisterPriv(*i) == EXIT_FAILURE)
         {

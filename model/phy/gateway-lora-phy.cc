@@ -40,7 +40,7 @@ NS_OBJECT_ENSURE_REGISTERED(GatewayLoraPhy);
  *    ReceptionPath implementation    *
  **************************************/
 GatewayLoraPhy::ReceptionPath::ReceptionPath()
-    : m_available(1),
+    : m_available(true),
       m_event(nullptr),
       m_endReceiveEventId(EventId())
 {
@@ -271,6 +271,7 @@ GatewayLoraPhy::Send(Ptr<Packet> packet,
 
     // Interrupt all receive operations
     for (auto& path : m_receptionPaths)
+    {
         if (!path->IsAvailable()) // Reception path is occupied
         {
             // Fire the trace source for reception interrupted by transmission
@@ -280,6 +281,7 @@ GatewayLoraPhy::Send(Ptr<Packet> packet,
             // Free it and resets all parameters
             path->Free();
         }
+    }
 
     // Tag packet with PHY layer tx info
     LoraTag tag;

@@ -120,7 +120,7 @@ LoraApplication::DoInitialize()
     if (bool(m_mac) == 0)
     {
         // Require exactly one LoraNetDevice installed on this node
-        Ptr<LoraNetDevice> netDev = 0;
+        Ptr<LoraNetDevice> netDev = nullptr;
         uint32_t i = 0;
         for (; i < m_node->GetNDevices() && bool(netDev) == 0; ++i)
         {

@@ -219,7 +219,7 @@ NetworkStatus::GetEndDeviceStatus(Ptr<const Packet> packet)
     else
     {
         NS_LOG_ERROR("EndDeviceStatus not found");
-        return 0;
+        return nullptr;
     }
 }
 
@@ -236,7 +236,7 @@ NetworkStatus::GetEndDeviceStatus(LoraDeviceAddress address)
     else
     {
         NS_LOG_ERROR("EndDeviceStatus not found");
-        return 0;
+        return nullptr;
     }
 }
 

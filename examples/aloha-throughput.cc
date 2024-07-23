@@ -145,7 +145,7 @@ main(int argc, char* argv[])
     mobility.Install(endDevices);
 
     // Make it so that nodes are at a certain height > 0
-    for (NodeContainer::Iterator j = endDevices.Begin(); j != endDevices.End(); ++j)
+    for (auto j = endDevices.Begin(); j != endDevices.End(); ++j)
     {
         Ptr<MobilityModel> mobility = (*j)->GetObject<MobilityModel>();
         Vector position = mobility->GetPosition();
@@ -168,7 +168,7 @@ main(int argc, char* argv[])
     // Now end devices are connected to the channel
 
     // Connect trace sources
-    for (NodeContainer::Iterator j = endDevices.Begin(); j != endDevices.End(); ++j)
+    for (auto j = endDevices.Begin(); j != endDevices.End(); ++j)
     {
         Ptr<Node> node = *j;
         Ptr<LoraNetDevice> loraNetDevice = DynamicCast<LoraNetDevice>(node->GetDevice(0));
@@ -217,11 +217,11 @@ main(int argc, char* argv[])
     {
         LoraPhyTxParameters txParams;
         txParams.sf = sf;
-        txParams.headerDisabled = 0;
+        txParams.headerDisabled = false;
         txParams.codingRate = 1;
         txParams.bandwidthHz = 125000;
         txParams.nPreamble = 8;
-        txParams.crcEnabled = 1;
+        txParams.crcEnabled = true;
         txParams.lowDataRateOptimizationEnabled = LoraPhy::GetTSym(txParams) > MilliSeconds(16);
         Ptr<Packet> pkt = Create<Packet>(packetSize);
 
@@ -229,8 +229,8 @@ main(int argc, char* argv[])
         fHdr.SetAsUplink();
         fHdr.SetFPort(1);
         fHdr.SetAddress(LoraDeviceAddress());
-        fHdr.SetAdr(0);
-        fHdr.SetAdrAckReq(0);
+        fHdr.SetAdr(false);
+        fHdr.SetAdrAckReq(false);
         fHdr.SetFCnt(0);
         pkt->AddHeader(fHdr);
 
@@ -268,7 +268,7 @@ main(int argc, char* argv[])
     forHelper.Install(gateways);
 
     // Install trace sources
-    for (NodeContainer::Iterator node = gateways.Begin(); node != gateways.End(); node++)
+    for (auto node = gateways.Begin(); node != gateways.End(); node++)
     {
         DynamicCast<LoraNetDevice>((*node)->GetDevice(0))
             ->GetPhy()
@@ -276,7 +276,7 @@ main(int argc, char* argv[])
     }
 
     // Install trace sources
-    for (NodeContainer::Iterator node = endDevices.Begin(); node != endDevices.End(); node++)
+    for (auto node = endDevices.Begin(); node != endDevices.End(); node++)
     {
         DynamicCast<LoraNetDevice>((*node)->GetDevice(0))
             ->GetPhy()

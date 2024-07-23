@@ -357,7 +357,7 @@ LoraFrameHeader::GetMacCommand()
         }
     }
     // If no command was found, return 0
-    return 0;
+    return nullptr;
 }
 } // namespace lorawan
 

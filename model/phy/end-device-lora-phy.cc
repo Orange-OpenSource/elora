@@ -353,7 +353,9 @@ EndDeviceLoraPhy::SwitchToStandby()
     m_state = STANDBY;
     // Notify listeners of the state change
     for (const auto& l : m_listeners)
+    {
         l->NotifyStandby();
+    }
 }
 
 void
@@ -364,7 +366,9 @@ EndDeviceLoraPhy::SwitchToSleep()
     m_state = SLEEP;
     // Notify listeners of the state change
     for (const auto& l : m_listeners)
+    {
         l->NotifySleep();
+    }
 }
 
 void
@@ -375,7 +379,9 @@ EndDeviceLoraPhy::SwitchToRx()
     m_state = RX;
     // Notify listeners of the state change
     for (const auto& l : m_listeners)
+    {
         l->NotifyRxStart();
+    }
 }
 
 void
@@ -386,7 +392,9 @@ EndDeviceLoraPhy::SwitchToTx(double txPowerDbm)
     m_state = TX;
     // Notify listeners of the state change
     for (const auto& l : m_listeners)
+    {
         l->NotifyTxStart(txPowerDbm);
+    }
 }
 
 EndDeviceLoraPhy::State

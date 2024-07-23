@@ -73,7 +73,7 @@ ApplicationContainer
 NetworkServerHelper::Install(NodeContainer c)
 {
     ApplicationContainer apps;
-    for (NodeContainer::Iterator i = c.Begin(); i != c.End(); ++i)
+    for (auto i = c.Begin(); i != c.End(); ++i)
     {
         apps.Add(InstallPriv(*i));
     }

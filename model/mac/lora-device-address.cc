@@ -188,7 +188,7 @@ LoraDeviceAddress::Get() const
     NS_LOG_FUNCTION_NOARGS();
 
     uint32_t address = 0;
-    uint32_t nwkId = uint32_t(m_nwkId.Get() << 25);
+    auto nwkId = uint32_t(m_nwkId.Get() << 25);
     address |= (m_nwkAddr.Get() | nwkId);
     NS_LOG_DEBUG("m_nwkId + m_nwkAddr = " << std::bitset<32>(address));
 

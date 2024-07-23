@@ -261,7 +261,7 @@ AdrComponent::AdrImplementation(uint8_t* newDataRate,
 double
 AdrComponent::GetMinTxFromGateways(EndDeviceStatus::GatewayList gwList)
 {
-    EndDeviceStatus::GatewayList::iterator it = gwList.begin();
+    auto it = gwList.begin();
     double min = it->second.rxPower;
 
     for (; it != gwList.end(); it++)
@@ -279,7 +279,7 @@ AdrComponent::GetMinTxFromGateways(EndDeviceStatus::GatewayList gwList)
 double
 AdrComponent::GetMaxTxFromGateways(EndDeviceStatus::GatewayList gwList)
 {
-    EndDeviceStatus::GatewayList::iterator it = gwList.begin();
+    auto it = gwList.begin();
     double max = it->second.rxPower;
 
     for (; it != gwList.end(); it++)
@@ -299,7 +299,7 @@ AdrComponent::GetAverageTxFromGateways(EndDeviceStatus::GatewayList gwList)
 {
     double sum = 0;
 
-    for (EndDeviceStatus::GatewayList::iterator it = gwList.begin(); it != gwList.end(); it++)
+    for (auto it = gwList.begin(); it != gwList.end(); it++)
     {
         NS_LOG_DEBUG("Gateway at " << it->first << " has TP " << it->second.rxPower);
         sum += it->second.rxPower;

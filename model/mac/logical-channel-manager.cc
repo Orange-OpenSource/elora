@@ -63,6 +63,7 @@ LogicalChannelManager::GetChannelList()
     NS_LOG_FUNCTION(this);
 
     std::vector<Ptr<LogicalChannel>> vector;
+    vector.reserve(m_channelList.size());
     for (auto& llc : m_channelList)
     {
         vector.push_back(llc.second);
@@ -107,13 +108,17 @@ LogicalChannelManager::GetSubBandFromFrequency(double frequency)
 {
     // Get the SubBand this frequency belongs to
     for (auto& sub : m_subBandList)
+    {
         if (sub->BelongsToSubBand(frequency))
+        {
             return sub;
+        }
+    }
 
     NS_LOG_ERROR("Requested frequency: " << frequency);
     NS_ABORT_MSG("Warning: frequency is outside any known SubBand.");
 
-    return 0; // If no SubBand is found, return 0
+    return nullptr; // If no SubBand is found, return 0
 }
 
 void
@@ -225,7 +230,9 @@ LogicalChannelManager::GetTxPowerForChannel(Ptr<LogicalChannel> logicalChannel)
     {
         // Check whether this channel is in this SubBand
         if (sub->BelongsToSubBand(logicalChannel->GetFrequency()))
+        {
             return sub->GetMaxTxPowerDbm();
+        }
     }
 
     NS_ABORT_MSG("Logical channel doesn't belong to a known SubBand");

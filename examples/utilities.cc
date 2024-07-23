@@ -85,7 +85,6 @@ OnInterrupt(sighandler_t action)
     std::signal(SIGILL, action);
     std::signal(SIGFPE, action);
     std::signal(SIGABRT, action);
-    std::signal(SIGFPE, action);
     std::signal(SIGTERM, action);
 }
 

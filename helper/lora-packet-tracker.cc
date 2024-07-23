@@ -150,7 +150,7 @@ LoraPacketTracker::PacketReceptionCallback(Ptr<const Packet> packet, uint32_t gw
         // Remove the successfully received packet from the list of sent ones
         NS_LOG_INFO("PHY packet " << packet << " was successfully received at gateway " << gwId);
 
-        std::map<Ptr<const Packet>, PacketStatus>::iterator it = m_packetTracker.find(packet);
+        auto it = m_packetTracker.find(packet);
         (*it).second.outcomes.insert(std::pair<int, enum PhyPacketOutcome>(gwId, RECEIVED));
     }
 }
@@ -162,7 +162,7 @@ LoraPacketTracker::InterferenceCallback(Ptr<const Packet> packet, uint32_t gwId)
     {
         NS_LOG_INFO("PHY packet " << packet << " was interfered at gateway " << gwId);
 
-        std::map<Ptr<const Packet>, PacketStatus>::iterator it = m_packetTracker.find(packet);
+        auto it = m_packetTracker.find(packet);
         (*it).second.outcomes.insert(std::pair<int, enum PhyPacketOutcome>(gwId, INTERFERED));
     }
 }
@@ -174,7 +174,7 @@ LoraPacketTracker::NoMoreReceiversCallback(Ptr<const Packet> packet, uint32_t gw
     {
         NS_LOG_INFO("PHY packet " << packet << " was lost because no more receivers at gateway "
                                   << gwId);
-        std::map<Ptr<const Packet>, PacketStatus>::iterator it = m_packetTracker.find(packet);
+        auto it = m_packetTracker.find(packet);
         (*it).second.outcomes.insert(
             std::pair<int, enum PhyPacketOutcome>(gwId, NO_MORE_RECEIVERS));
     }
@@ -188,7 +188,7 @@ LoraPacketTracker::UnderSensitivityCallback(Ptr<const Packet> packet, uint32_t g
         NS_LOG_INFO("PHY packet " << packet << " was lost because under sensitivity at gateway "
                                   << gwId);
 
-        std::map<Ptr<const Packet>, PacketStatus>::iterator it = m_packetTracker.find(packet);
+        auto it = m_packetTracker.find(packet);
         (*it).second.outcomes.insert(
             std::pair<int, enum PhyPacketOutcome>(gwId, UNDER_SENSITIVITY));
     }
@@ -202,7 +202,7 @@ LoraPacketTracker::LostBecauseTxCallback(Ptr<const Packet> packet, uint32_t gwId
         NS_LOG_INFO("PHY packet " << packet << " was lost because of GW transmission at gateway "
                                   << gwId);
 
-        std::map<Ptr<const Packet>, PacketStatus>::iterator it = m_packetTracker.find(packet);
+        auto it = m_packetTracker.find(packet);
         (*it).second.outcomes.insert(std::pair<int, enum PhyPacketOutcome>(gwId, LOST_BECAUSE_TX));
     }
 }
@@ -506,8 +506,10 @@ LoraPacketTracker::CountAllDevicesPackets(Time startTime, Time stopTime, DevPktC
         if (mpd.second.sendTime >= startTime && mpd.second.sendTime <= stopTime)
         {
             out[mpd.second.senderId].sent++;
-            if (mpd.second.receptionTimes.size())
+            if (!mpd.second.receptionTimes.empty())
+            {
                 out[mpd.second.senderId].received++;
+            }
         }
     }
 }

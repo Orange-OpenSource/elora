@@ -580,7 +580,7 @@ RxParamSetupReq::Serialize(Buffer::Iterator& start) const
     start.WriteU8(GetCIDFromMacCommand(m_commandType));
     // Data serialization
     start.WriteU8((m_rx1DrOffset & 0b111) << 4 | (m_rx2DataRate & 0b1111));
-    uint32_t encodedFrequency = uint32_t(m_frequency / 100);
+    auto encodedFrequency = uint32_t(m_frequency / 100);
     NS_LOG_DEBUG(unsigned(encodedFrequency));
     NS_LOG_DEBUG(std::bitset<32>(encodedFrequency));
     start.WriteU8((encodedFrequency & 0xff0000) >> 16); // Most significant byte
@@ -855,7 +855,7 @@ NewChannelReq::Serialize(Buffer::Iterator& start) const
     start.WriteU8(GetCIDFromMacCommand(m_commandType));
 
     start.WriteU8(m_chIndex);
-    uint32_t encodedFrequency = uint32_t(m_frequency / 100);
+    auto encodedFrequency = uint32_t(m_frequency / 100);
     start.WriteU8((encodedFrequency & 0xff0000) >> 16);
     start.WriteU8((encodedFrequency & 0xff00) >> 8);
     start.WriteU8(encodedFrequency & 0xff);
@@ -1199,7 +1199,7 @@ DlChannelReq::Serialize(Buffer::Iterator& start) const
     start.WriteU8(GetCIDFromMacCommand(m_commandType));
 
     start.WriteU8(m_chIndex);
-    uint32_t encodedFrequency = uint32_t(m_frequency / 100);
+    auto encodedFrequency = uint32_t(m_frequency / 100);
     start.WriteU8((encodedFrequency & 0xff0000) >> 16);
     start.WriteU8((encodedFrequency & 0xff00) >> 8);
     start.WriteU8(encodedFrequency & 0xff);

@@ -1225,7 +1225,7 @@ TimeOnAirTest::DoRun()
     txParams.codingRate = 1;
     txParams.bandwidthHz = 125000;
     txParams.nPreamble = 8;
-    txParams.crcEnabled = 1;
+    txParams.crcEnabled = true;
     txParams.lowDataRateOptimizationEnabled = false;
 
     duration = LoraPhy::GetTimeOnAir(packet, txParams);

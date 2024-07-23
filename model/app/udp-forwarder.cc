@@ -150,8 +150,6 @@ UdpForwarder::ReceiveFromLora(Ptr<LorawanMac> mac, Ptr<const Packet> packet)
         p.datarate = DR_LORA_SF11;
         break;
     case 0:
-        p.datarate = DR_LORA_SF12;
-        break;
     default:
         p.datarate = DR_LORA_SF12;
         break;
@@ -229,7 +227,9 @@ UdpForwarder::StartApplication()
 #ifdef NS3_LOG_ENABLE
     std::stringstream peerAddressStringStream;
     if (Ipv4Address::IsMatchingType(m_peerAddress))
+    {
         peerAddressStringStream << Ipv4Address::ConvertFrom(m_peerAddress);
+    }
     m_peerAddressString = peerAddressStringStream.str();
 #endif // NS3_LOG_ENABLE
 
@@ -804,12 +804,12 @@ UdpForwarder::ReceiveAck(Ptr<Socket> sockUp)
     clock_gettime(CLOCK_MONOTONIC, &m_upRecvTime);
     if ((j < 4) || (buff_ack[0] != PROTOCOL_VERSION) || (buff_ack[3] != PKT_PUSH_ACK))
     {
-        // NS_LOG_WARN ("[up] ignored invalid non-ACL packet");
+        NS_LOG_WARN ("[up] ignored invalid non-ACL packet");
         m_remainingRecvAckAttempts--; /* continue; */
     }
     else if ((buff_ack[1] != m_upTokenH) || (buff_ack[2] != m_upTokenL))
     {
-        // NS_LOG_WARN ("[up] ignored out-of sync ACK packet");
+        NS_LOG_WARN ("[up] ignored out-of sync ACK packet");
         m_remainingRecvAckAttempts--; /* continue; */
     }
     else
@@ -1170,11 +1170,7 @@ UdpForwarder::ReceiveDatagram(Ptr<Socket> sockDown)
         {
             txpkt.coderate = CR_LORA_4_5;
         }
-        else if (strcmp(str, "4/6") == 0)
-        {
-            txpkt.coderate = CR_LORA_4_6;
-        }
-        else if (strcmp(str, "2/3") == 0)
+        else if (strcmp(str, "4/6") == 0 || strcmp(str, "2/3") == 0)
         {
             txpkt.coderate = CR_LORA_4_6;
         }
@@ -1182,11 +1178,7 @@ UdpForwarder::ReceiveDatagram(Ptr<Socket> sockDown)
         {
             txpkt.coderate = CR_LORA_4_7;
         }
-        else if (strcmp(str, "4/8") == 0)
-        {
-            txpkt.coderate = CR_LORA_4_8;
-        }
-        else if (strcmp(str, "1/2") == 0)
+        else if (strcmp(str, "4/8") == 0 || strcmp(str, "1/2") == 0)
         {
             txpkt.coderate = CR_LORA_4_8;
         }
@@ -1552,7 +1544,7 @@ UdpForwarder::CollectStatistics()
     ss << jit_get_print_queue(&jit_queue, false, DEBUG_LOG);
     snprintf(buf, 120, "### [GPS] ###\n");
     ss << buf;
-    if (gps_fake_enable == true)
+    if (gps_fake_enable)
     {
         snprintf(buf,
                  120,
@@ -1710,16 +1702,6 @@ UdpForwarder::LgwSend(struct lgw_pkt_tx_s pkt_data)
     }
 
     /* check input variables */
-    if (false) // rf_tx_enable[pkt_data.rf_chain] == false)
-    {
-        NS_LOG_ERROR("SELECTED RF_CHAIN IS DISABLED FOR TX ON SELECTED BOARD");
-        return LGW_HAL_ERROR;
-    }
-    if (false) // rf_enable[pkt_data.rf_chain] == false)
-    {
-        NS_LOG_ERROR("SELECTED RF_CHAIN IS DISABLED");
-        return LGW_HAL_ERROR;
-    }
     if (!IS_TX_MODE(pkt_data.tx_mode))
     {
         NS_LOG_ERROR("TX_MODE NOT SUPPORTED");
@@ -1790,8 +1772,6 @@ UdpForwarder::LgwSend(struct lgw_pkt_tx_s pkt_data)
         tag.SetDataRate(1);
         break;
     case DR_LORA_SF12:
-        tag.SetDataRate(0);
-        break;
     default:
         tag.SetDataRate(0);
         break;
