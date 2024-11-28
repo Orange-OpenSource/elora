@@ -76,4 +76,4 @@ If you need any help, feel free to open an issue here.
 
 ## Cite us
 
-[A. Aimi, S. Rovedakis, F. Guillemin, and S. Secci, “ELoRa: End-to-end Emulation of Massive IoT LoRaWAN Infrastructures,” 2023 IEEE/IFIP Network Operations and Management Symposium (NOMS), May 2023, Miami, FL, United States.](https://hal.science/hal-04025834)
+[A. Aimi, S. Rovedakis, F. Guillemin, and S. Secci, “ELoRa: End-to-end Emulation of Massive IoT LoRaWAN Infrastructures,” 2023 IEEE/IFIP Network Operations and Management Symposium (NOMS), May 2023, Miami, FL, United States.](https://doi.org/10.1109/NOMS56928.2023.10154373)
