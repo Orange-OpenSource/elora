@@ -46,10 +46,7 @@ main(int argc, char* argv[])
     std::string tenant = "ELoRa";
     std::string apiAddr = "127.0.0.1";
     uint16_t apiPort = 8090;
-    std::string token =
-        "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9."
-        "eyJhdWQiOiJjaGlycHN0YWNrIiwiaXNzIjoiY2hpcnBzdGFjayIsInN1YiI6ImQ2ZGQ4OGFiLTNmN2MtNGJlZi1hZW"
-        "U1LWVmZGRkNWEyZmE3MSIsInR5cCI6ImtleSJ9.UJmVOv2Chbh1T5xjUSBF9jZuGmmLg3xu7Dg_77otxkA";
+    std::string token = "...";
     uint16_t destPort = 1700;
 
     double periods = 24; // H * D
@@ -81,6 +78,7 @@ main(int argc, char* argv[])
         cmd.AddValue("file", "Whether to enable .pcap tracing on gateways", file);
         cmd.AddValue("log", "Whether to enable logs", log);
         cmd.Parse(argc, argv);
+        NS_ABORT_MSG_IF(token == "...", "Please provide an auth token for the ChirpStack API");
     }
 
     /* Apply global configurations */
@@ -99,6 +97,7 @@ main(int argc, char* argv[])
     {
         //!> Requirement: build ns3 with debug option
         LogComponentEnable("UdpForwarder", LOG_LEVEL_DEBUG);
+        LogComponentEnable("ChirpstackHelper", LOG_LEVEL_DEBUG);
         LogComponentEnable("ClassAEndDeviceLorawanMac", LOG_LEVEL_INFO);
         LogComponentEnable("BaseEndDeviceLorawanMac", LOG_LEVEL_INFO);
         // LogComponentEnable ("LoraFrameHeader", LOG_LEVEL_INFO);
