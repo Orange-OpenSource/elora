@@ -5,7 +5,7 @@ diff -ruN '--exclude=.git' ns-3-dev/CMakeLists.txt ns-3-patched/CMakeLists.txt
  )
  option(NS3_PYTHON_BINDINGS "Build ns-3 python bindings" OFF)
  option(NS3_SQLITE "Build with SQLite support" ON)
-+option(NS3_CURL "Build with cURL support" ON)
++option(NS3_CURL "Build with curl support" ON)
  option(NS3_EIGEN "Build with Eigen support" ON)
  option(NS3_STATIC "Build a static ns-3 library and link it against executables"
         OFF
@@ -16,37 +16,35 @@ diff -ruN '--exclude=.git' ns-3-dev/build-support/custom-modules/ns3-configtable
    string(APPEND out "SQLite support                : ")
    check_on_or_off("NS3_SQLITE" "ENABLE_SQLITE")
  
-+  string(APPEND out "cURL support                  : ")
++  string(APPEND out "curl support                  : ")
 +  check_on_or_off("NS3_CURL" "ENABLE_CURL")
-+  
++
    string(APPEND out "Eigen3 support                : ")
    check_on_or_off("NS3_EIGEN" "ENABLE_EIGEN")
  
 diff -ruN '--exclude=.git' ns-3-dev/build-support/macros-and-definitions.cmake ns-3-patched/build-support/macros-and-definitions.cmake
 --- ns-3-dev/build-support/macros-and-definitions.cmake	2023-05-02 16:02:36.132855438 +0200
 +++ ns-3-patched/build-support/macros-and-definitions.cmake	2023-05-02 15:59:39.396445183 +0200
-@@ -797,6 +797,24 @@
+@@ -544,6 +544,22 @@
      endif()
    endif()
  
 +  set(ENABLE_CURL False)
 +  if(${NS3_CURL})
-+    # find_package(curl QUIET) # unsupported in CMake 3.10 We emulate the
-+    # behavior of find_package below
 +    find_external_library(
 +      DEPENDENCY_NAME curl
 +      HEADER_NAME curl.h
 +      LIBRARY_NAME curl
++      OUTPUT_VARIABLE "ENABLE_CURL_REASON"
 +    )
 +
 +    if(${curl_FOUND})
 +      set(ENABLE_CURL True)
++      add_definitions(-DHAVE_CURL)
 +      include_directories(${curl_INCLUDE_DIRS})
-+    else()
-+      message(${HIGHLIGHTED_STATUS} "cURL was not found")
 +    endif()
 +  endif()
 +
    set(ENABLE_EIGEN False)
    if(${NS3_EIGEN})
-     find_package(Eigen3 QUIET)
+     disable_cmake_warnings()
