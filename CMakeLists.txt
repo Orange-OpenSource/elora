@@ -132,24 +132,22 @@ set(header_files
     third-party/loramac-node/cmac.h
 )
 
-build_lib(
-  LIBNAME elora
-  SOURCE_FILES ${source_files}
-  HEADER_FILES ${header_files}
-  LIBRARIES_TO_LINK
-    ${libpoint-to-point}
-    ${libinternet-apps}
-    ${libapplications}
-    ${libpropagation}
-    ${libbuildings}
-    ${libenergy}
-    ${libcsma}
-    ${libtap-bridge}
-    ${curl_LIBRARIES}
-  TEST_SOURCES
-    test/utilities.cc
-    test/lorawan-test-suite.cc
-    test/network-status-test-suite.cc
-    test/network-scheduler-test-suite.cc
-    test/network-server-test-suite.cc
-)
+if(${ENABLE_CURL})
+  build_lib(
+    LIBNAME elora
+    SOURCE_FILES ${source_files}
+    HEADER_FILES ${header_files}
+    LIBRARIES_TO_LINK
+      ${libenergy}
+      ${libpoint-to-point}
+      ${libbuildings}
+      ${libinternet}
+      ${curl_LIBRARIES}
+    TEST_SOURCES
+      test/utilities.cc
+      test/lorawan-test-suite.cc
+      test/network-status-test-suite.cc
+      test/network-scheduler-test-suite.cc
+      test/network-server-test-suite.cc
+  )
+endif()
