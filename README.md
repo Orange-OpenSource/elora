@@ -26,13 +26,12 @@ To use this simulator you need to know the following:
 
 If not already, install the `libcurl` development library in your linux distribution (`libcurl4-gnutls-dev` on Ubuntu, `curl-dev` on Alpine).
 
-Clone [ns-3](https://www.nsnam.org "ns-3 Website"), clone this repository inside the `contrib` directory, checkout the right commit, and patch ns-3 using the provided [patch file](ns-3-dev.patch) with the following all-in-one command:
+Clone [ns-3](https://www.nsnam.org "ns-3 Website"), clone this repository inside the `contrib` directory, and checkout the right commit with the following all-in-one command:
 
 ```bash
 git clone https://gitlab.com/nsnam/ns-3-dev.git && cd ns-3-dev &&
 git clone https://github.com/Orange-OpenSource/elora.git contrib/elora &&
-tag=$(< contrib/elora/NS3-VERSION) && tag=${tag#release } && git checkout $tag -b $tag &&
-patch -p1 -s < contrib/elora/ns-3-dev.patch
+tag=$(< contrib/elora/NS3-VERSION) && tag=${tag#release } && git checkout $tag -b $tag
 ```
 
 Make sure you are in the `ns-3-dev` directory, then configure and build ns-3 with the following all-in-one command:
@@ -42,7 +41,7 @@ Make sure you are in the `ns-3-dev` directory, then configure and build ns-3 wit
 ./ns3 build
 ```
 
-The `elora` module extends the code of the original `lorawan` ns-3 module, thus the two modules are in conflict if they are built together. If you also have the original `lorawan` module installed (either in the `contrib` or `src` directory), run `./ns3 clean` and add the  `--enable-modules elora` option to the `./ns3 configure` command above to avoid building both.
+The `elora` module extends the code of the original `lorawan` ns-3 module, thus the two modules are in conflict if they are built together. If you also have the original `lorawan` module installed (either in the `contrib` or `src` directory), run `./ns3 clean` and add the  `--enable-modules "elora;tap-bridge;csma"` option to the `./ns3 configure` command above to avoid building both.
 
 ## Usage examples
 

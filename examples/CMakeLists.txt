@@ -10,7 +10,10 @@ set(base_examples
     pcap-example
 )
 
-foreach(example ${base_examples})
+foreach(
+  example
+  ${base_examples}
+)
   build_lib_example(
     NAME ${example}
     SOURCE_FILES ${example}.cc
@@ -21,7 +24,7 @@ endforeach()
 build_lib_example(
   NAME elora-example
   SOURCE_FILES elora-example.cc
-  LIBRARIES_TO_LINK 
+  LIBRARIES_TO_LINK
     ${libelora}
     ${libtap-bridge}
     ${libcsma}

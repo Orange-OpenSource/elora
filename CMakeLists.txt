@@ -132,7 +132,13 @@ set(header_files
     third-party/loramac-node/cmac.h
 )
 
-if(${ENABLE_CURL})
+find_external_library(
+  DEPENDENCY_NAME curl
+  HEADER_NAME curl.h
+  LIBRARY_NAME curl
+)
+
+if(${curl_FOUND})
   build_lib(
     LIBNAME elora
     SOURCE_FILES ${source_files}
@@ -149,5 +155,14 @@ if(${ENABLE_CURL})
       test/network-status-test-suite.cc
       test/network-scheduler-test-suite.cc
       test/network-server-test-suite.cc
+  )
+  target_include_directories(
+    elora
+    PRIVATE ${curl_INCLUDE_DIRS}
+  )
+else()
+  message(
+    ${HIGHLIGHTED_STATUS}
+    "curl was not found. elora won't be built"
   )
 endif()
