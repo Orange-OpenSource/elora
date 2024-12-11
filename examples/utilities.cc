@@ -95,18 +95,28 @@ PrintConfigSetup(int nDevs, double range, int rings, std::vector<int>& devPerSF)
     std::cout << ss.str();
 }
 
+static const int signals[] = {
+    SIGHUP,
+    SIGINT,
+    SIGQUIT,
+    SIGILL,
+    SIGABRT,
+    SIGFPE,
+    SIGSEGV,
+    SIGPIPE,
+    SIGTERM,
+};
+
 /**
  * Setup action on interrupt
  */
 void
 OnInterrupt(sighandler_t action)
 {
-    std::signal(SIGINT, action);
-    std::signal(SIGSEGV, action);
-    std::signal(SIGILL, action);
-    std::signal(SIGFPE, action);
-    std::signal(SIGABRT, action);
-    std::signal(SIGTERM, action);
+    for (int s : signals)
+    {
+        std::signal(s, action);
+    }
 }
 
 /**

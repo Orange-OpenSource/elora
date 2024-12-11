@@ -50,8 +50,6 @@ class ChirpstackHelper
   public:
     ChirpstackHelper();
 
-    ~ChirpstackHelper();
-
     int InitConnection(const str address, uint16_t port, const str token);
 
     void CloseConnection(int signal);

@@ -37,11 +37,6 @@ ChirpstackHelper::ChirpstackHelper()
     m_session.appKey = "00000000000000000000000000000000";
 }
 
-ChirpstackHelper::~ChirpstackHelper()
-{
-    CloseConnection(EXIT_SUCCESS);
-}
-
 int
 ChirpstackHelper::InitConnection(const str address, uint16_t port, const str token)
 {
@@ -70,7 +65,11 @@ ChirpstackHelper::InitConnection(const str address, uint16_t port, const str tok
 void
 ChirpstackHelper::CloseConnection(int signal)
 {
-    NS_ASSERT_MSG(!m_session.tenantId.empty(), "Connection was not initialized before closing it");
+    /* Return immediatly if connection was not initialized to begin with */
+    if (m_session.tenantId.empty())
+    {
+        return;
+    }
 
     str reply;
 
@@ -118,8 +117,8 @@ ChirpstackHelper::Register(NodeContainer c) const
 int
 ChirpstackHelper::CreateHttpIntegration(const str& encoding, const str& endpoint) const
 {
-    NS_ASSERT_MSG(!m_session.tenantId.empty(),
-                  "Connection was not initialized before creating integration");
+    NS_ABORT_MSG_IF(m_session.tenantId.empty(),
+                    "Connection was not initialized before registering device");
 
     str payload = "{"
                   "  \"integration\": {"
@@ -149,8 +148,8 @@ ChirpstackHelper::CreateInfluxDb2Integration(const str& endpoint,
                                              const str& bucket,
                                              const str& token) const
 {
-    NS_ASSERT_MSG(!m_session.tenantId.empty(),
-                  "Connection was not initialized before creating integration");
+    NS_ABORT_MSG_IF(m_session.tenantId.empty(),
+                    "Connection was not initialized before registering device");
 
     str payload = "{"
                   "  \"integration\": {"
@@ -376,8 +375,8 @@ int
 ChirpstackHelper::RegisterPriv(Ptr<Node> node) const
 {
     NS_LOG_FUNCTION(this << node);
-    NS_ASSERT_MSG(!m_session.tenantId.empty(),
-                  "Connection was not initialized before registering device");
+    NS_ABORT_MSG_IF(m_session.tenantId.empty(),
+                    "Connection was not initialized before registering device");
 
     Ptr<LoraNetDevice> netdev;
     // We assume nodes can have at max 1 LoraNetDevice

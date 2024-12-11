@@ -280,7 +280,11 @@ main(int argc, char* argv[])
      ***************************/
 
     ///////////////////// Signal handling
-    OnInterrupt([](int signal) { csHelper.CloseConnection(signal); });
+    OnInterrupt([](int signal) {
+        csHelper.CloseConnection(signal);
+        OnInterrupt(SIG_DFL); // avoid multiple executions
+        exit(0);
+    });
     ///////////////////// Register tenant, gateways, and devices on the real server
     csHelper.SetTenant(tenant);
     csHelper.InitConnection(apiAddr, apiPort, token);
