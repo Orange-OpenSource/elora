@@ -52,7 +52,7 @@
 #define DEFAULT_KEEPALIVE 5 /* default time interval for downstream keep-alive packet */
 #define DEFAULT_STAT 30     /* default time interval for statistics */
 #define PUSH_TIMEOUT_MS 100
-#define PULL_TIMEOUT_MS 2000 /*period for checking keepalive (PULL) threshold */
+#define PULL_TIMEOUT_MS 200 /*period for checking keepalive (PULL) threshold */
 #define GPS_REF_MAX_AGE                                                                            \
     30 /* maximum admitted delay in seconds of GPS loss before considering latest GPS sync         \
           unusable */
