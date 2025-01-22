@@ -263,6 +263,9 @@ class BaseEndDeviceLorawanMac : public LorawanMac
     /* Counter for keepalive purposes */
     uint16_t m_ADRACKCnt;
 
+    /* Uplink only - request keepalive acknowledgement from the server */
+    bool m_ADRACKReq;
+
     /**
      * The event of transmitting a packet in a consecutive moment, when the duty cycle let us
      * transmit or if an ACK is not received.
@@ -450,9 +453,6 @@ class BaseEndDeviceLorawanMac : public LorawanMac
      * Whether this device's data rate should be controlled by the NS.
      */
     bool m_ADRBit;
-
-    /* Uplink only - request keepalive acknowledgement from the server */
-    bool m_ADRACKReq;
 
     /**
      * Uplink frame counter of the device

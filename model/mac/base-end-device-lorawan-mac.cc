@@ -113,11 +113,11 @@ BaseEndDeviceLorawanMac::BaseEndDeviceLorawanMac()
       m_nbTrans(1),
       // Protected MAC layer context
       m_ADRACKCnt(0),
+      m_ADRACKReq(false),
       // Private Header fields
       m_fType(LorawanMacHeader::UNCONFIRMED_DATA_UP),
       m_address(LoraDeviceAddress(0)),
       m_ADRBit(false),
-      m_ADRACKReq(false),
       m_fCnt(0),
       // Private MAC layer settings
       m_enableADRBackoff(false),
@@ -674,10 +674,9 @@ BaseEndDeviceLorawanMac::OnLinkAdrReq(uint8_t dataRate,
         txPowerOk = false;
     }
 
-    NS_LOG_DEBUG("Finished checking. "
-                 << "ChannelMaskOk: " << channelMaskOk << ", "
-                 << "DataRateOk: " << dataRateOk << ", "
-                 << "txPowerOk: " << txPowerOk);
+    NS_LOG_DEBUG("Finished checking. " << "ChannelMaskOk: " << channelMaskOk << ", "
+                                       << "DataRateOk: " << dataRateOk << ", "
+                                       << "txPowerOk: " << txPowerOk);
 
     // If all checks are successful, set parameters up
     //////////////////////////////////////////////////

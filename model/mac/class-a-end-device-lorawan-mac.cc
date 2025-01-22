@@ -156,8 +156,9 @@ ClassAEndDeviceLorawanMac::Receive(Ptr<const Packet> packet)
     m_rwm->Stop();
     // Open the context to new transmissions
     m_txContext.busy = false;
-    // Reset ADR backoff counter
+    // Reset ADR backoff counter and bit
     m_ADRACKCnt = 0;
+    m_ADRACKReq = false;
     // Clear commands that are re-sent until downlink (DlChannelAns and RxTimingSetupAns)
     m_fOpts.clear();
 
