@@ -78,6 +78,11 @@ main(int argc, char* argv[])
         cmd.AddValue("file", "Whether to enable .pcap tracing on gateways", file);
         cmd.AddValue("log", "Whether to enable logs", log);
         cmd.Parse(argc, argv);
+        if (auto f = getenv("CHIRPSTACK_API_TOKEN_FILE"); f)
+        {
+            std::ifstream file(f);
+            std::getline(file, token);
+        }
         NS_ABORT_MSG_IF(token == "...", "Please provide an auth token for the ChirpStack API");
     }
 
