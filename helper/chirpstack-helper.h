@@ -28,7 +28,6 @@ namespace lorawan
 class ChirpstackHelper
 {
     using str = std::string;
-    using query_t = std::vector<std::pair<str, str>>;
 
     struct session_t
     {
@@ -76,6 +75,10 @@ class ChirpstackHelper
 
     int CreateTenant(const str& name);
 
+    int DeleteTenant(const str& id);
+
+    int ListTenantIds(const str& search, std::vector<str>& out);
+
     int CreateDeviceProfile(const str& name);
 
     int CreateApplication(const str& name);
@@ -87,6 +90,8 @@ class ChirpstackHelper
     int CreateGateway(Ptr<Node> node) const;
 
     int POST(const str& path, const str& body, str& out) const;
+
+    int GET(const str& path, str& out) const;
 
     int DELETE(const str& path, str& out) const;
 

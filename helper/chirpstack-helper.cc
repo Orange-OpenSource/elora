@@ -71,13 +71,8 @@ ChirpstackHelper::CloseConnection(int signal)
         return;
     }
 
-    str reply;
-
     /* Remove tentant */
-    if (DELETE("/api/tenants/" + m_session.tenantId, reply) == EXIT_FAILURE)
-    {
-        NS_LOG_ERROR("Unable to unregister tenant, got reply: " << reply);
-    }
+    DeleteTenant(m_session.tenantId);
 
     /* Wipe session data */
     m_session.tenantId.clear();
@@ -220,6 +215,14 @@ ChirpstackHelper::DoConnect()
 int
 ChirpstackHelper::CreateTenant(const str& name)
 {
+    /* Clean existing tenants with the same run name */
+    std::vector<str> ids;
+    ListTenantIds(name + "%20" + std::to_string((unsigned)m_run), ids);
+    for (const str& id : ids)
+    {
+        DeleteTenant(id);
+    }
+
     str payload = "{"
                   "  \"tenant\": {"
                   "    \"canHaveGateways\": true,"
@@ -228,7 +231,7 @@ ChirpstackHelper::CreateTenant(const str& name)
                   "    \"maxDeviceCount\": 0,"
                   "    \"maxGatewayCount\": 0,"
                   "    \"name\": \"" +
-                  name + "-" + std::to_string((unsigned)m_run) +
+                  name + " " + std::to_string((unsigned)m_run) +
                   "\","
                   "    \"privateGatewaysDown\": false,"
                   "    \"privateGatewaysUp\": false"
@@ -249,6 +252,47 @@ ChirpstackHelper::CreateTenant(const str& name)
     }
 
     m_session.tenantId = json_object_get_string(json_value_get_object(json), "id");
+    json_value_free(json);
+
+    return EXIT_SUCCESS;
+}
+
+int
+ChirpstackHelper::DeleteTenant(const str& id)
+{
+    str reply;
+    if (DELETE("/api/tenants/" + id, reply) == EXIT_FAILURE)
+    {
+        NS_FATAL_ERROR("Unable to unregister tenant (id: " << id << "), got reply: " << reply);
+    }
+
+    return EXIT_SUCCESS;
+}
+
+int
+ChirpstackHelper::ListTenantIds(const str& search, std::vector<str>& out)
+{
+    str reply;
+    if (GET("/api/tenants?limit=1000&search=" + search, reply) == EXIT_FAILURE)
+    {
+        NS_FATAL_ERROR("Unable to list tenants, got reply: " << reply);
+    }
+
+    JSON_Value* json = nullptr;
+    json = json_parse_string_with_comments(reply.c_str());
+    if (json == nullptr)
+    {
+        NS_FATAL_ERROR("Invalid JSON in list tenant reply: " << reply);
+    }
+
+    JSON_Array* array = json_object_get_array(json_value_get_object(json), "result");
+
+    out.clear();
+    for (size_t i = 0; i < json_array_get_count(array); ++i)
+    {
+        out.emplace_back(json_object_get_string(json_array_get_object(array, i), "id"));
+    }
+
     json_value_free(json);
 
     return EXIT_SUCCESS;
@@ -574,6 +618,52 @@ ChirpstackHelper::POST(const str& path, const str& body, str& out) const
 
     out = ss.str();
     NS_LOG_INFO("Received POST reply: " << out);
+
+    /* Check for errors */
+    if (res != CURLE_OK)
+    {
+        NS_LOG_ERROR("curl_easy_perform() failed: " << curl_easy_strerror(res) << "\n");
+        return EXIT_FAILURE;
+    }
+    return EXIT_SUCCESS;
+}
+
+int
+ChirpstackHelper::GET(const str& path, str& out) const
+{
+    CURL* curl;
+    CURLcode res;
+    std::stringstream ss;
+
+    /* get a curl handle */
+    curl = curl_easy_init();
+    if (curl)
+    {
+        /* Set the URL that is about to receive our POST. */
+        curl_easy_setopt(curl, CURLOPT_URL, (m_url + path).c_str());
+
+        /* Specify the HEADER content */
+        curl_easy_setopt(curl, CURLOPT_HTTPHEADER, m_header);
+
+        /* Set reply stringstream */
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, (void*)StreamWriteCallback);
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void*)&ss);
+
+        NS_LOG_INFO("Sending GET request to " << m_url << path);
+        /* Perform the request, res will get the return code */
+        res = curl_easy_perform(curl);
+
+        /* always cleanup */
+        curl_easy_cleanup(curl);
+    }
+    else
+    {
+        NS_LOG_ERROR("curl_easy_init() failed\n");
+        return EXIT_FAILURE;
+    }
+
+    out = ss.str();
+    NS_LOG_INFO("Received GET reply: " << out);
 
     /* Check for errors */
     if (res != CURLE_OK)
