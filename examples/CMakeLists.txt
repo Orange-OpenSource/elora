@@ -29,3 +29,12 @@ build_lib_example(
     ${libtap-bridge}
     ${libcsma}
 )
+
+build_lib_example(
+     NAME elora-example-TTN
+     SOURCE_FILES elora-example-TTN.cc
+     LIBRARIES_TO_LINK
+      ${libelora}
+      ${libtap-bridge}
+      ${libcsma}
+)
