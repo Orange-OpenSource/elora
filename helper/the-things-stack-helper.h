@@ -6,8 +6,8 @@
  * Author: Carlos Fernandez Hernandez <carlos.fernandez-hernandez@insa-lyon.fr>
  */
 
-#ifndef TTN_HELPER_H
-#define TTN_HELPER_H
+#ifndef THE_THINGS_STACK_HELPER_H
+#define THE_THINGS_STACK_HELPER_H
 
 #include "ns3/loragw_hal.h"
 #include "ns3/node-container.h"
@@ -21,10 +21,10 @@ namespace lorawan
 
 /**
  * This class can be used to install devices and gateways on a real
- * TTN network server using the REST API.
+ * The Things Stack network server using the REST API.
  * Requires libcurl-dev installed.
  */
-class TTNHelper
+class TheThingsStackHelper
 {
     using str = std::string;
     using query_t = std::vector<std::pair<str, str>>;
@@ -49,9 +49,9 @@ class TTNHelper
     };
 
   public:
-    TTNHelper();
+    TheThingsStackHelper();
 
-    ~TTNHelper();
+    ~TheThingsStackHelper();
 
     int InitConnection(const str address, uint16_t port, const str token);
 
@@ -104,4 +104,4 @@ class TTNHelper
 } // namespace lorawan
 
 } // namespace ns3
-#endif /* TTN_HELPER_H */
+#endif /* THE_THINGS_STACK_HELPER_H */

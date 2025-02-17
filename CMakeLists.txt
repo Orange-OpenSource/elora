@@ -54,7 +54,7 @@ set(source_files
     helper/one-shot-sender-helper.cc
     helper/urban-traffic-helper.cc
     helper/chirpstack-helper.cc
-    helper/TTN-helper.cc
+    helper/the-things-stack-helper.cc
     third-party/packet_forwarder/base64.cc
     third-party/packet_forwarder/jitqueue.cc
     third-party/packet_forwarder/parson.cc
@@ -120,7 +120,7 @@ set(header_files
     helper/one-shot-sender-helper.h
     helper/urban-traffic-helper.h
     helper/chirpstack-helper.h
-    helper/TTN-helper.h
+    helper/the-things-stack-helper.h
     third-party/packet_forwarder/base64.h
     third-party/packet_forwarder/jitqueue.h
     third-party/packet_forwarder/parson.h

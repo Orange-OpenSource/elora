@@ -21,20 +21,21 @@ foreach(
   )
 endforeach()
 
-build_lib_example(
-  NAME elora-example
-  SOURCE_FILES elora-example.cc
-  LIBRARIES_TO_LINK
-    ${libelora}
-    ${libtap-bridge}
-    ${libcsma}
+set(elora_examples
+    elora-cs-example
+    elora-tts-example
 )
 
-build_lib_example(
-  NAME elora-example-TTN
-  SOURCE_FILES elora-example-TTN.cc
-  LIBRARIES_TO_LINK
-    ${libelora}
-    ${libtap-bridge}
-    ${libcsma}
+foreach(
+  example
+  ${elora_examples}
 )
+  build_lib_example(
+    NAME ${example}
+    SOURCE_FILES ${example}.cc
+    LIBRARIES_TO_LINK
+      ${libelora}
+      ${libtap-bridge}
+      ${libcsma}
+  )
+endforeach()

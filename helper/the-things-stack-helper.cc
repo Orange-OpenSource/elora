@@ -6,7 +6,7 @@
  * Author: Carlos Fernandez Hernandez <carlos.fernandez-hernandez@insa-lyon.fr>
  */
 
-#include "TTN-helper.h"
+#include "the-things-stack-helper.h"
 
 #include "ns3/base-end-device-lorawan-mac.h"
 #include "ns3/gateway-lorawan-mac.h"
@@ -20,11 +20,11 @@ namespace ns3
 namespace lorawan
 {
 
-NS_LOG_COMPONENT_DEFINE("TTNHelper");
+NS_LOG_COMPONENT_DEFINE("TheThingsStackHelper");
 
-const struct coord_s TTNHelper::m_center = {48.866831, 2.356719, 42};
+const struct coord_s TheThingsStackHelper::m_center = {48.866831, 2.356719, 42};
 
-TTNHelper::TTNHelper()
+TheThingsStackHelper::TheThingsStackHelper()
     : m_run(1)
 {
     m_url = "http://localhost:8885";
@@ -37,13 +37,13 @@ TTNHelper::TTNHelper()
     m_session.appKey = "2b7e151628aed2a6abf7158809cf4f3c";
 }
 
-TTNHelper::~TTNHelper()
+TheThingsStackHelper::~TheThingsStackHelper()
 {
     CloseConnection(EXIT_SUCCESS);
 }
 
 int
-TTNHelper::InitConnection(const str address, uint16_t port, const str token)
+TheThingsStackHelper::InitConnection(const str address, uint16_t port, const str token)
 {
     NS_LOG_FUNCTION(this << address << (unsigned)port);
 
@@ -68,7 +68,7 @@ TTNHelper::InitConnection(const str address, uint16_t port, const str token)
 }
 
 void
-TTNHelper::CloseConnection(int signal) const
+TheThingsStackHelper::CloseConnection(int signal) const
 {
     str reply;
     // uint64_t id;
@@ -126,13 +126,13 @@ TTNHelper::CloseConnection(int signal) const
 }
 
 int
-TTNHelper::Register(Ptr<Node> node) const
+TheThingsStackHelper::Register(Ptr<Node> node) const
 {
     return RegisterPriv(node);
 }
 
 int
-TTNHelper::Register(NodeContainer c) const
+TheThingsStackHelper::Register(NodeContainer c) const
 {
     for (NodeContainer::Iterator i = c.Begin(); i != c.End(); ++i)
     {
@@ -146,32 +146,32 @@ TTNHelper::Register(NodeContainer c) const
 }
 
 void
-TTNHelper::SetNodes(int n, int gw)
+TheThingsStackHelper::SetNodes(int n, int gw)
 {
     m_session.nDevices = n;
     m_session.nGateway = gw;
 }
 
 void
-TTNHelper::SetApp(str& name)
+TheThingsStackHelper::SetApp(str& name)
 {
     m_session.tenant = name;
 }
 
 void
-TTNHelper::SetDeviceProfile(str& name)
+TheThingsStackHelper::SetDeviceProfile(str& name)
 {
     m_session.devProf = name;
 }
 
 void
-TTNHelper::SetApplication(str& name)
+TheThingsStackHelper::SetApplication(str& name)
 {
     m_session.app = name;
 }
 
 int
-TTNHelper::DoConnect()
+TheThingsStackHelper::DoConnect()
 {
     /* Init curl */
     curl_global_init(CURL_GLOBAL_NOTHING);
@@ -185,7 +185,7 @@ TTNHelper::DoConnect()
 // std::to_string((unsigned)m_run)
 
 int
-TTNHelper::NewApplication(const str& name)
+TheThingsStackHelper::NewApplication(const str& name)
 {
     m_session.appId = name + std::to_string((unsigned)m_run) + "-test";
     NS_LOG_DEBUG("Name:" << m_session.appId);
@@ -226,7 +226,7 @@ TTNHelper::NewApplication(const str& name)
 }
 
 int
-TTNHelper::RegisterPriv(Ptr<Node> node) const
+TheThingsStackHelper::RegisterPriv(Ptr<Node> node) const
 {
     NS_LOG_FUNCTION(this << node);
 
@@ -258,7 +258,7 @@ TTNHelper::RegisterPriv(Ptr<Node> node) const
 }
 
 int
-TTNHelper::NewDevice(Ptr<Node> node) const
+TheThingsStackHelper::NewDevice(Ptr<Node> node) const
 {
     NS_LOG_DEBUG("ED(session prof ID: " << str(m_session.devProfId) << ")");
     char eui[17];
@@ -428,7 +428,7 @@ TTNHelper::NewDevice(Ptr<Node> node) const
 }
 
 int
-TTNHelper::NewGateway(Ptr<Node> node) const
+TheThingsStackHelper::NewGateway(Ptr<Node> node) const
 {
     char eui[17];
     uint64_t id = (m_run << 48) + node->GetId();
@@ -482,7 +482,7 @@ TTNHelper::NewGateway(Ptr<Node> node) const
 }
 
 int
-TTNHelper::PUT(const str& path, const str& body, str& out) const
+TheThingsStackHelper::PUT(const str& path, const str& body, str& out) const
 {
     CURL* curl;
     CURLcode res;
@@ -538,7 +538,7 @@ TTNHelper::PUT(const str& path, const str& body, str& out) const
 }
 
 int
-TTNHelper::POST(const str& path, const str& body, str& out) const
+TheThingsStackHelper::POST(const str& path, const str& body, str& out) const
 {
     CURL* curl;
     CURLcode res;
@@ -594,7 +594,7 @@ TTNHelper::POST(const str& path, const str& body, str& out) const
 }
 
 int
-TTNHelper::DELETE(const str& path, str& out) const
+TheThingsStackHelper::DELETE(const str& path, str& out) const
 {
     CURL* curl;
     CURLcode res;
@@ -643,7 +643,10 @@ TTNHelper::DELETE(const str& path, str& out) const
 }
 
 size_t
-TTNHelper::StreamWriteCallback(char* buffer, size_t size, size_t nitems, std::ostream* stream)
+TheThingsStackHelper::StreamWriteCallback(char* buffer,
+                                          size_t size,
+                                          size_t nitems,
+                                          std::ostream* stream)
 {
     size_t realwrote = size * nitems;
     stream->write(buffer, static_cast<std::streamsize>(realwrote));
