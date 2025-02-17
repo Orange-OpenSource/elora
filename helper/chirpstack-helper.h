@@ -25,7 +25,7 @@ namespace lorawan
  * chirpstack network server using the REST API.
  * Requires libcurl-dev installed.
  */
-class ChirpstackHelper
+class ChirpStackHelper
 {
     using str = std::string;
 
@@ -47,7 +47,7 @@ class ChirpstackHelper
     };
 
   public:
-    ChirpstackHelper();
+    ChirpStackHelper();
 
     int InitConnection(const str address, uint16_t port, const str token);
 

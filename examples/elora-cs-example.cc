@@ -34,7 +34,7 @@ using namespace lorawan;
 NS_LOG_COMPONENT_DEFINE_EXAMPLE_WITH_UTILITIES("EloraCSExample");
 
 /* Global declaration of connection helper for signal handling */
-ChirpstackHelper csHelper;
+ChirpStackHelper csHelper;
 
 int
 main(int argc, char* argv[])
@@ -62,11 +62,11 @@ main(int argc, char* argv[])
     /* Expose parameters to command line */
     {
         CommandLine cmd(__FILE__);
-        cmd.AddValue("tenant", "Chirpstack tenant name of this simulation", tenant);
-        cmd.AddValue("apiAddr", "Chirpstack REST API endpoint IP address", apiAddr);
-        cmd.AddValue("apiPort", "Chirpstack REST API endpoint IP address", apiPort);
-        cmd.AddValue("token", "Chirpstack API token (to be generated in Chirpstack UI)", token);
-        cmd.AddValue("destPort", "Port used by the Chirpstack Gateway Bridge", destPort);
+        cmd.AddValue("tenant", "ChirpStack tenant name of this simulation", tenant);
+        cmd.AddValue("apiAddr", "ChirpStack REST API endpoint IP address", apiAddr);
+        cmd.AddValue("apiPort", "ChirpStack REST API endpoint IP address", apiPort);
+        cmd.AddValue("token", "ChirpStack API token (to be generated in ChirpStack UI)", token);
+        cmd.AddValue("destPort", "Port used by the ChirpStack Gateway Bridge", destPort);
         cmd.AddValue("periods", "Number of periods to simulate (1 period = 1 hour)", periods);
         cmd.AddValue("rings", "Number of gateway rings in hexagonal topology", gatewayRings);
         cmd.AddValue("range", "Radius of the device allocation disk around a gateway)", range);
@@ -102,7 +102,7 @@ main(int argc, char* argv[])
     {
         //!> Requirement: build ns3 with debug option
         LogComponentEnable("UdpForwarder", LOG_LEVEL_DEBUG);
-        LogComponentEnable("ChirpstackHelper", LOG_LEVEL_DEBUG);
+        LogComponentEnable("ChirpStackHelper", LOG_LEVEL_DEBUG);
         LogComponentEnable("ClassAEndDeviceLorawanMac", LOG_LEVEL_INFO);
         LogComponentEnable("BaseEndDeviceLorawanMac", LOG_LEVEL_INFO);
         // LogComponentEnable ("LoraFrameHeader", LOG_LEVEL_INFO);
