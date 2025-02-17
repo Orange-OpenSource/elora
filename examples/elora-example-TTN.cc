@@ -5,12 +5,7 @@
 
 #include "utilities.cc"
 
-
 // ns3 imports
-#include <cstdlib>
-#include <ctime>
-
-#include <iostream>
 #include "ns3/core-module.h"
 #include "ns3/csma-helper.h"
 #include "ns3/internet-stack-helper.h"
@@ -21,10 +16,13 @@
 #include "ns3/propagation-delay-model.h"
 #include "ns3/tap-bridge-helper.h"
 
-// lorawan imports
-#include "ns3/chirpstack-helper.h"
-#include "ns3/TTN-helper.h"
+#include <cstdlib>
+#include <ctime>
+#include <iostream>
 
+// lorawan imports
+#include "ns3/TTN-helper.h"
+#include "ns3/chirpstack-helper.h"
 #include "ns3/hex-grid-position-allocator.h"
 #include "ns3/lorawan-helper.h"
 #include "ns3/periodic-sender-helper.h"
@@ -43,6 +41,7 @@ NS_LOG_COMPONENT_DEFINE_EXAMPLE_WITH_UTILITIES("EloraExample-TTN");
 /* Global declaration of connection helper for signal handling */
 ChirpstackHelper csHelper;
 TTNHelper ttnHelper;
+
 int
 main(int argc, char* argv[])
 {
@@ -53,7 +52,8 @@ main(int argc, char* argv[])
     std::string tenant = "ELoRa";
     std::string apiAddr = "127.0.0.1";
     uint16_t apiPort = 1885;
-    std::string token = "NNSXS.DI5ELFVSXNP2QWRPAN55SU6XJRPNDKH6ITM3WHQ.R2NMA6WZKMI7NKJXJTDS2N5TOD57FFEBGUKPKQWPRQ3SDRFLO6MQ";
+    std::string token = "NNSXS.DI5ELFVSXNP2QWRPAN55SU6XJRPNDKH6ITM3WHQ."
+                        "R2NMA6WZKMI7NKJXJTDS2N5TOD57FFEBGUKPKQWPRQ3SDRFLO6MQ";
 
     uint16_t destPort = 1700;
 
@@ -67,7 +67,6 @@ main(int argc, char* argv[])
     bool file = false; // Warning: will produce a file for each gateway
     bool log = false;
     int nGateways = 3 * gatewayRings * gatewayRings - 3 * gatewayRings + 1;
-
 
     /* Expose parameters to command line */
     {
@@ -289,7 +288,7 @@ main(int argc, char* argv[])
 
     ///////////////////// Register tenant, gateways, and devices on the real server
     ttnHelper.InitConnection(apiAddr, apiPort, token);
-    ttnHelper.SetNodes( nDevices,nGateways);
+    ttnHelper.SetNodes(nDevices, nGateways);
     ttnHelper.Register(NodeContainer(endDevices, gateways));
 
     // Initialize SF emulating the ADR algorithm, then add variance to path loss
