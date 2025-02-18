@@ -22,7 +22,7 @@ namespace lorawan
 
 /**
  * This class can be used to install devices and gateways on a real
- * chirpstack network server using the REST API.
+ * ChirpStack network server using the REST API.
  * Requires libcurl-dev installed.
  */
 class ChirpStackHelper
@@ -48,6 +48,8 @@ class ChirpStackHelper
 
   public:
     ChirpStackHelper();
+
+    ~ChirpStackHelper();
 
     int InitConnection(const str address, uint16_t port, const str token);
 
@@ -111,6 +113,6 @@ class ChirpStackHelper
 };
 
 } // namespace lorawan
-
 } // namespace ns3
+
 #endif /* CHIRPSTACK_HELPER_H */

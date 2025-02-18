@@ -28,13 +28,18 @@ const struct coord_s ChirpStackHelper::m_center = {48.866831, 2.356719, 42};
 ChirpStackHelper::ChirpStackHelper()
     : m_run(1)
 {
-    m_url = "http://localhost:8090/";
+    m_url = "http://localhost:8090";
 
     m_token = "";
 
     /* Initialize session keys */
     m_session.netKey = "2b7e151628aed2a6abf7158809cf4f3c";
     m_session.appKey = "00000000000000000000000000000000";
+}
+
+ChirpStackHelper::~ChirpStackHelper()
+{
+    CloseConnection(EXIT_SUCCESS);
 }
 
 int
