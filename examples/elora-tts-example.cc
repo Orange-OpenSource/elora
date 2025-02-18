@@ -16,12 +16,7 @@
 #include "ns3/propagation-delay-model.h"
 #include "ns3/tap-bridge-helper.h"
 
-#include <cstdlib>
-#include <ctime>
-#include <iostream>
-
 // lorawan imports
-#include "ns3/chirpstack-helper.h"
 #include "ns3/hex-grid-position-allocator.h"
 #include "ns3/lorawan-helper.h"
 #include "ns3/periodic-sender-helper.h"
@@ -39,7 +34,6 @@ using namespace lorawan;
 NS_LOG_COMPONENT_DEFINE_EXAMPLE_WITH_UTILITIES("EloraTTSExample");
 
 /* Global declaration of connection helper for signal handling */
-ChirpStackHelper csHelper;
 TheThingsStackHelper ttsHelper;
 
 int
@@ -57,7 +51,7 @@ main(int argc, char* argv[])
 
     uint16_t destPort = 1700;
 
-    double periods = 0.01; // H * D
+    double periods = 24; // H * D
     int gatewayRings = 1;
     double range = 2540.25; // Max range for downlink (!) coverage probability > 0.98 (with okumura)
     int nDevices = 1;
@@ -66,7 +60,6 @@ main(int argc, char* argv[])
     bool testDev = false;
     bool file = false; // Warning: will produce a file for each gateway
     bool log = false;
-    int nGateways = 3 * gatewayRings * gatewayRings - 3 * gatewayRings + 1;
 
     /* Expose parameters to command line */
     {
@@ -87,6 +80,12 @@ main(int argc, char* argv[])
         cmd.AddValue("file", "Whether to enable .pcap tracing on gateways", file);
         cmd.AddValue("log", "Whether to enable logs", log);
         cmd.Parse(argc, argv);
+        if (auto f = getenv("THE_THINGS_STACK_API_TOKEN_FILE"); f)
+        {
+            std::ifstream file(f);
+            std::getline(file, token);
+        }
+        NS_ABORT_MSG_IF(token == "...", "Please provide an auth token for The Thing Stack API");
     }
 
     /* Apply global configurations */
@@ -179,6 +178,7 @@ main(int argc, char* argv[])
     {
         exitnode = CreateObject<Node>();
 
+        int nGateways = 3 * gatewayRings * gatewayRings - 3 * gatewayRings + 1;
         gateways.Create(nGateways);
         mobilityGw.Install(gateways);
         rangeAllocator->SetNodes(gateways);
@@ -283,12 +283,14 @@ main(int argc, char* argv[])
      ***************************/
 
     ///////////////////// Signal handling
-
-    OnInterrupt([](int signal) { ttsHelper.CloseConnection(signal); });
-
+    OnInterrupt([](int signal) {
+        ttsHelper.CloseConnection(signal);
+        OnInterrupt(SIG_DFL); // avoid multiple executions
+        exit(0);
+    });
     ///////////////////// Register tenant, gateways, and devices on the real server
     ttsHelper.InitConnection(apiAddr, apiPort, token);
-    ttsHelper.SetNodes(nDevices, nGateways);
+    ttsHelper.SetNodes(nDevices, gateways.GetN());
     ttsHelper.Register(NodeContainer(endDevices, gateways));
 
     // Initialize SF emulating the ADR algorithm, then add variance to path loss

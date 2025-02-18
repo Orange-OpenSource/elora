@@ -22,16 +22,13 @@ namespace lorawan
 
 NS_LOG_COMPONENT_DEFINE("TheThingsStackHelper");
 
-const struct coord_s TheThingsStackHelper::m_center = {48.866831, 2.356719, 42};
-
 TheThingsStackHelper::TheThingsStackHelper()
     : m_run(1)
 {
-    m_url = "http://localhost:8885";
+    m_url = "http://localhost:1885";
 
-    /* Initialize token */
-    m_token = "NNSXS.CI4KYAD4WEVQUQHTBI77DPQQ2WN2IROIKWRCLDA."
-              "TEXTNWIJMJ4Z5LSGJVBBKJ72QAL3S3GAQDHFTTOR4GUDZI2TCHWQ";
+    m_token = "";
+
     /* Initialize session keys */
     m_session.netKey = "2b7e151628aed2a6abf7158809cf4f3c";
     m_session.appKey = "2b7e151628aed2a6abf7158809cf4f3c";
@@ -48,8 +45,8 @@ TheThingsStackHelper::InitConnection(const str address, uint16_t port, const str
     NS_LOG_FUNCTION(this << address << (unsigned)port);
 
     /* Setup base URL string with IP and port */
-    m_url = address + ":" + std::to_string(port);
-    NS_LOG_INFO("TTN REST API URL set to: " << m_url);
+    m_url = "http://" + address + ":" + std::to_string(port);
+    NS_LOG_INFO("The Things Stack REST API URL set to: " << m_url);
 
     /* set API token */
     m_token = token;
@@ -60,7 +57,7 @@ TheThingsStackHelper::InitConnection(const str address, uint16_t port, const str
     m_header = curl_slist_append(m_header, ("Authorization: Bearer " + m_token).c_str());
     m_header = curl_slist_append(m_header, "Accept: application/json");
     m_header = curl_slist_append(m_header, "Content-Type: application/json");
-    NS_LOG_INFO("Curl Header " << m_header);
+
     /* get run identifier */
     m_run = RngSeedManager::GetRun();
 
@@ -71,7 +68,6 @@ void
 TheThingsStackHelper::CloseConnection(int signal) const
 {
     str reply;
-    // uint64_t id;
     /* Delete all ED */
     NS_LOG_DEBUG("Starting Delete Devices");
 
@@ -134,7 +130,7 @@ TheThingsStackHelper::Register(Ptr<Node> node) const
 int
 TheThingsStackHelper::Register(NodeContainer c) const
 {
-    for (NodeContainer::Iterator i = c.Begin(); i != c.End(); ++i)
+    for (auto i = c.Begin(); i != c.End(); ++i)
     {
         if (RegisterPriv(*i) == EXIT_FAILURE)
         {
@@ -153,18 +149,6 @@ TheThingsStackHelper::SetNodes(int n, int gw)
 }
 
 void
-TheThingsStackHelper::SetApp(str& name)
-{
-    m_session.tenant = name;
-}
-
-void
-TheThingsStackHelper::SetDeviceProfile(str& name)
-{
-    m_session.devProf = name;
-}
-
-void
 TheThingsStackHelper::SetApplication(str& name)
 {
     m_session.app = name;
@@ -176,16 +160,13 @@ TheThingsStackHelper::DoConnect()
     /* Init curl */
     curl_global_init(CURL_GLOBAL_NOTHING);
     /* Create Ns-3 application */
-    m_session.appId = m_session.app + std::to_string((unsigned)m_run) + "-test";
-    NewApplication(m_session.app);
+    CreateApplication(m_session.app);
 
     return EXIT_SUCCESS;
 }
 
-// std::to_string((unsigned)m_run)
-
 int
-TheThingsStackHelper::NewApplication(const str& name)
+TheThingsStackHelper::CreateApplication(const str& name)
 {
     m_session.appId = name + std::to_string((unsigned)m_run) + "-test";
     NS_LOG_DEBUG("Name:" << m_session.appId);
@@ -209,18 +190,16 @@ TheThingsStackHelper::NewApplication(const str& name)
     {
         NS_FATAL_ERROR("Unable to register new application, got reply: " << reply);
     }
-    NS_LOG_DEBUG("Came Back");
 
     JSON_Value* json = nullptr;
     json = json_parse_string_with_comments(reply.c_str());
     if (json == nullptr)
     {
-        NS_FATAL_ERROR("Invalid JSON in device profile registration reply: " << reply);
+        NS_FATAL_ERROR("Invalid JSON in application registration reply: " << reply);
     }
+    json_value_free(json);
 
     NS_LOG_DEBUG("appId:" << m_session.appId);
-
-    json_value_free(json);
 
     return EXIT_SUCCESS;
 }
@@ -238,11 +217,11 @@ TheThingsStackHelper::RegisterPriv(Ptr<Node> node) const
         {
             if (bool(DynamicCast<BaseEndDeviceLorawanMac>(netdev->GetMac())))
             {
-                NewDevice(node);
+                CreateDevice(node);
             }
             else if (bool(DynamicCast<GatewayLorawanMac>(netdev->GetMac())))
             {
-                NewGateway(node);
+                CreateGateway(node);
             }
             else
             {
@@ -258,14 +237,11 @@ TheThingsStackHelper::RegisterPriv(Ptr<Node> node) const
 }
 
 int
-TheThingsStackHelper::NewDevice(Ptr<Node> node) const
+TheThingsStackHelper::CreateDevice(Ptr<Node> node) const
 {
-    NS_LOG_DEBUG("ED(session prof ID: " << str(m_session.devProfId) << ")");
     char eui[17];
     uint64_t id = (m_run << 48) + node->GetId();
-
     snprintf(eui, 17, "%016lx", id);
-    NS_LOG_DEBUG("ED(session prof ID: " << str(m_session.appId) << ")");
 
     str payload = "{"
                   "\"end_device\": {"
@@ -301,9 +277,6 @@ TheThingsStackHelper::NewDevice(Ptr<Node> node) const
     auto netdev = DynamicCast<LoraNetDevice>(node->GetDevice(0));
     auto mac = DynamicCast<BaseEndDeviceLorawanMac>(netdev->GetMac());
     snprintf(devAddr, 9, "%08x", mac->GetDeviceAddress().Get());
-    NS_LOG_DEBUG("DeviceAddr" << str(devAddr) << ")");
-    NS_LOG_DEBUG("m_session.netKey" << str(m_session.netKey) << ")");
-    NS_LOG_DEBUG("m_session.appKey" << str(m_session.appKey) << ")");
 
     payload = "{"
               "\"end_device\": {"
@@ -428,27 +401,11 @@ TheThingsStackHelper::NewDevice(Ptr<Node> node) const
 }
 
 int
-TheThingsStackHelper::NewGateway(Ptr<Node> node) const
+TheThingsStackHelper::CreateGateway(Ptr<Node> node) const
 {
     char eui[17];
     uint64_t id = (m_run << 48) + node->GetId();
     snprintf(eui, 17, "%016lx", id);
-
-    /* get reference coordinates */
-    coord_s coord;
-    double r_earth = 6371000.0;
-    Vector position = node->GetObject<MobilityModel>()->GetPosition();
-    coord.alt = m_center.alt + (short)position.z;
-    coord.lat = m_center.lat + (position.y / r_earth) * (180.0 / M_PI);
-    coord.lon =
-        m_center.lon + (position.x / r_earth) * (180.0 / M_PI) / cos(m_center.lat * M_PI / 180.0);
-    char coordbuf[100];
-    snprintf(coordbuf,
-             100,
-             "\"altitude\":%i,\"latitude\":%.5f,\"longitude\":%.5f,",
-             coord.alt,
-             coord.lat,
-             coord.lon);
 
     str payload = "{"
                   "  \"gateway\": {                                                                "
@@ -567,10 +524,7 @@ TheThingsStackHelper::POST(const str& path, const str& body, str& out) const
 
         NS_LOG_INFO("Sending POST request to " << m_url << path << ", with body: " << body);
         /* Perform the request, res will get the return code */
-        NS_LOG_INFO("Request:" << body.c_str());
-
         res = curl_easy_perform(curl);
-        NS_LOG_INFO("Result request:" << res);
 
         /* always cleanup */
         curl_easy_cleanup(curl);
