@@ -12,8 +12,7 @@
 
 #include "ns3/loragw_hal.h"
 #include "ns3/node-container.h"
-
-#include <curl/curl.h>
+#include "ns3/rest-api-helper.h"
 
 namespace ns3
 {
@@ -25,7 +24,7 @@ namespace lorawan
  * ChirpStack network server using the REST API.
  * Requires libcurl-dev installed.
  */
-class ChirpStackHelper
+class ChirpStackHelper : public RestApiHelper
 {
     using str = std::string;
 
@@ -51,9 +50,7 @@ class ChirpStackHelper
 
     ~ChirpStackHelper();
 
-    int InitConnection(const str address, uint16_t port, const str token);
-
-    void CloseConnection(int signal);
+    void CloseConnection(int signal) override;
 
     int Register(NodeContainer c) const;
 
@@ -73,7 +70,7 @@ class ChirpStackHelper
     void SetApplication(str& name);
 
   private:
-    int DoConnect();
+    int DoConnect() override;
 
     int CreateTenant(const str& name);
 
@@ -90,21 +87,6 @@ class ChirpStackHelper
     int CreateDevice(Ptr<Node> node) const;
 
     int CreateGateway(Ptr<Node> node) const;
-
-    int POST(const str& path, const str& body, str& out) const;
-
-    int GET(const str& path, str& out) const;
-
-    int DELETE(const str& path, str& out) const;
-
-    static size_t StreamWriteCallback(char* buffer,
-                                      size_t size,
-                                      size_t nitems,
-                                      std::ostream* stream);
-
-    str m_url;
-    str m_token;
-    struct curl_slist* m_header = nullptr;
 
     session_t m_session;
     uint64_t m_run;

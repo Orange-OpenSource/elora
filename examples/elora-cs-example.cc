@@ -103,6 +103,7 @@ main(int argc, char* argv[])
         //!> Requirement: build ns3 with debug option
         LogComponentEnable("UdpForwarder", LOG_LEVEL_DEBUG);
         LogComponentEnable("ChirpStackHelper", LOG_LEVEL_DEBUG);
+        LogComponentEnable("RestApiHelper", LOG_LEVEL_DEBUG);
         LogComponentEnable("ClassAEndDeviceLorawanMac", LOG_LEVEL_INFO);
         LogComponentEnable("BaseEndDeviceLorawanMac", LOG_LEVEL_INFO);
         // LogComponentEnable ("LoraFrameHeader", LOG_LEVEL_INFO);
