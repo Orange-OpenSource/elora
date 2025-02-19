@@ -104,6 +104,8 @@ main(int argc, char* argv[])
     {
         //!> Requirement: build ns3 with debug option
         LogComponentEnable("UdpForwarder", LOG_LEVEL_DEBUG);
+        LogComponentEnable("TheThingsStackHelper", LOG_LEVEL_ALL);
+        LogComponentEnable("RestApiHelper", LOG_LEVEL_ALL);
         /* Monitor state changes of devices */
         LogComponentEnable("EloraTTSExample", LOG_LEVEL_ALL);
         /* Formatting */

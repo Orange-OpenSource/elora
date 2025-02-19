@@ -9,10 +9,8 @@
 #ifndef THE_THINGS_STACK_HELPER_H
 #define THE_THINGS_STACK_HELPER_H
 
-#include "ns3/loragw_hal.h"
 #include "ns3/node-container.h"
-
-#include <curl/curl.h>
+#include "ns3/rest-api-helper.h"
 
 namespace ns3
 {
@@ -20,11 +18,12 @@ namespace lorawan
 {
 
 /**
- * This class can be used to install devices and gateways on a real
- * The Things Stack network server using the REST API.
- * Requires libcurl-dev installed.
+ * This class can be used to install devices and gateways on a real The Things Stack network server
+ * using the REST API.
+ *
+ * \warning Requires libcurl-dev installed.
  */
-class TheThingsStackHelper
+class TheThingsStackHelper : public RestApiHelper
 {
     using str = std::string;
 
@@ -48,9 +47,7 @@ class TheThingsStackHelper
 
     ~TheThingsStackHelper();
 
-    int InitConnection(const str address, uint16_t port, const str token);
-
-    void CloseConnection(int signal) const;
+    void CloseConnection(int signal) override;
 
     int Register(NodeContainer c) const;
 
@@ -61,7 +58,7 @@ class TheThingsStackHelper
     void SetNodes(int n, int gw);
 
   private:
-    int DoConnect();
+    int DoConnect() override;
 
     int CreateApplication(const str& name);
 
@@ -70,21 +67,6 @@ class TheThingsStackHelper
     int CreateDevice(Ptr<Node> node) const;
 
     int CreateGateway(Ptr<Node> node) const;
-
-    int POST(const str& path, const str& body, str& out) const;
-
-    int PUT(const str& path, const str& body, str& out) const;
-
-    int DELETE(const str& path, str& out) const;
-
-    static size_t StreamWriteCallback(char* buffer,
-                                      size_t size,
-                                      size_t nitems,
-                                      std::ostream* stream);
-
-    str m_url;
-    str m_token;
-    struct curl_slist* m_header = nullptr;
 
     session_t m_session;
     uint64_t m_run;
