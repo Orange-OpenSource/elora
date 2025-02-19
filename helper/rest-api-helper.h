@@ -54,11 +54,7 @@ class RestApiHelper
     str m_baseUrl;
 
     struct curl_slist* m_header;
-
-    CURL* m_curl_handle_get;
-    CURL* m_curl_handle_post;
-    CURL* m_curl_handle_put;
-    CURL* m_curl_handle_delete;
+    CURL* m_curl;
 };
 
 } // namespace lorawan

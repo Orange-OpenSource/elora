@@ -24,24 +24,20 @@ RestApiHelper::RestApiHelper()
     : m_baseUrl(""),
       m_header(nullptr)
 {
-    NS_LOG_FUNCTION_NOARGS();
     /* Init curl */
     curl_global_init(CURL_GLOBAL_NOTHING);
-    /* Init handles */
-    m_curl_handle_get = curl_easy_init();
-    m_curl_handle_post = curl_easy_init();
-    m_curl_handle_put = curl_easy_init();
-    m_curl_handle_delete = curl_easy_init();
+    /* Init handle */
+    if (m_curl = curl_easy_init(); !m_curl)
+    {
+        NS_FATAL_ERROR("curl_easy_init() failed.");
+    }
 }
 
 RestApiHelper::~RestApiHelper()
 {
     NS_LOG_FUNCTION_NOARGS();
-    /* Cleanup handles */
-    curl_easy_cleanup(m_curl_handle_get);
-    curl_easy_cleanup(m_curl_handle_post);
-    curl_easy_cleanup(m_curl_handle_put);
-    curl_easy_cleanup(m_curl_handle_delete);
+    /* Cleanup handle */
+    curl_easy_cleanup(m_curl);
     /* Cleanup curl */
     curl_global_cleanup();
 }
@@ -59,20 +55,11 @@ RestApiHelper::InitConnection(const str address, uint16_t port, const str token)
     NS_ASSERT_MSG(!token.empty(), "Empty API token.");
     curl_slist_free_all(m_header); /* free the header list if previously set */
     m_header = curl_slist_append(m_header, ("Authorization: Bearer " + token).c_str());
-    m_header = curl_slist_append(m_header, "Accept: application/json");
-    m_header = curl_slist_append(m_header, "Content-Type: application/json");
 
     /* Set HTTP header in handles */
-    curl_easy_setopt(m_curl_handle_get, CURLOPT_HTTPHEADER, m_header);
-    curl_easy_setopt(m_curl_handle_post, CURLOPT_HTTPHEADER, m_header);
-    curl_easy_setopt(m_curl_handle_put, CURLOPT_HTTPHEADER, m_header);
-    curl_easy_setopt(m_curl_handle_delete, CURLOPT_HTTPHEADER, m_header);
-
+    curl_easy_setopt(m_curl, CURLOPT_HTTPHEADER, m_header);
     /* Set reply write callback */
-    curl_easy_setopt(m_curl_handle_get, CURLOPT_WRITEFUNCTION, StringWriteCallback);
-    curl_easy_setopt(m_curl_handle_post, CURLOPT_WRITEFUNCTION, StringWriteCallback);
-    curl_easy_setopt(m_curl_handle_put, CURLOPT_WRITEFUNCTION, StringWriteCallback);
-    curl_easy_setopt(m_curl_handle_delete, CURLOPT_WRITEFUNCTION, StringWriteCallback);
+    curl_easy_setopt(m_curl, CURLOPT_WRITEFUNCTION, StringWriteCallback);
 
     return DoConnect();
 }
@@ -80,98 +67,60 @@ RestApiHelper::InitConnection(const str address, uint16_t port, const str token)
 int
 RestApiHelper::GET(const str& path, str& out) const
 {
-    /* Check handle */
-    if (!m_curl_handle_get)
-    {
-        NS_LOG_ERROR("curl_easy_init() failed\n");
-        return EXIT_FAILURE;
-    }
+    /* Set the request type to GET */
+    curl_easy_setopt(m_curl, CURLOPT_HTTPGET, 1);
+    /* Reset any custom request type */
+    curl_easy_setopt(m_curl, CURLOPT_CUSTOMREQUEST, NULL);
 
     /* Perform the request */
     NS_LOG_INFO("Sending GET request to " << m_baseUrl << path);
-    int status = ExecuteRequest(m_curl_handle_get, m_baseUrl + path, out);
-    NS_LOG_INFO("Received GET reply: " << out);
-
-    return status;
+    return ExecuteRequest(m_curl, m_baseUrl + path, out);
 }
 
 int
 RestApiHelper::POST(const str& path, const str& body, str& out) const
 {
-    /* Check handle */
-    if (!m_curl_handle_post)
-    {
-        NS_LOG_ERROR("curl_easy_init() failed\n");
-        return EXIT_FAILURE;
-    }
-
-    /* Add request body */
-    curl_easy_setopt(m_curl_handle_post, CURLOPT_POSTFIELDS, body.c_str());
-    curl_easy_setopt(m_curl_handle_post, CURLOPT_POSTFIELDSIZE, (long)body.size());
+    /* Set request type to POST and add body */
+    curl_easy_setopt(m_curl, CURLOPT_POSTFIELDS, body.c_str());
+    curl_easy_setopt(m_curl, CURLOPT_POSTFIELDSIZE, (long)body.size());
+    /* Reset any custom request type */
+    curl_easy_setopt(m_curl, CURLOPT_CUSTOMREQUEST, NULL);
 
     /* Perform the request */
     NS_LOG_INFO("Sending POST request to " << m_baseUrl << path << ", with body: " << body);
-    int status = ExecuteRequest(m_curl_handle_post, m_baseUrl + path, out);
-    NS_LOG_INFO("Received POST reply: " << out);
-
-    return status;
+    return ExecuteRequest(m_curl, m_baseUrl + path, out);
 }
 
 int
 RestApiHelper::PUT(const str& path, const str& body, str& out) const
 {
-    /* Check handle */
-    if (!m_curl_handle_put)
-    {
-        NS_LOG_ERROR("curl_easy_init() failed\n");
-        return EXIT_FAILURE;
-    }
-
-    /* Set the request type to PUT */
-    curl_easy_setopt(m_curl_handle_put, CURLOPT_CUSTOMREQUEST, "PUT");
-    /* Add request body */
-    curl_easy_setopt(m_curl_handle_put, CURLOPT_POSTFIELDS, body.c_str());
-    curl_easy_setopt(m_curl_handle_put, CURLOPT_POSTFIELDSIZE, (long)body.size());
+    /* Set request type to POST and add body */
+    curl_easy_setopt(m_curl, CURLOPT_POSTFIELDS, body.c_str());
+    curl_easy_setopt(m_curl, CURLOPT_POSTFIELDSIZE, (long)body.size());
+    /* Set PUT as custom request type */
+    curl_easy_setopt(m_curl, CURLOPT_CUSTOMREQUEST, "PUT");
 
     /* Perform the request */
     NS_LOG_INFO("Sending PUT request to " << m_baseUrl << path << ", with body: " << body);
-    int status = ExecuteRequest(m_curl_handle_put, m_baseUrl + path, out);
-    NS_LOG_INFO("Received PUT reply: " << out);
-
-    return status;
+    return ExecuteRequest(m_curl, m_baseUrl + path, out);
 }
 
 int
 RestApiHelper::DELETE(const str& path, str& out) const
 {
-    /* Check handle */
-    if (!m_curl_handle_delete)
-    {
-        NS_LOG_ERROR("curl_easy_init() failed\n");
-        return EXIT_FAILURE;
-    }
-
-    /* Set the request type to DELETE */
-    curl_easy_setopt(m_curl_handle_delete, CURLOPT_CUSTOMREQUEST, "DELETE");
+    /* Set the request type to GET */
+    curl_easy_setopt(m_curl, CURLOPT_HTTPGET, 1);
+    /* Set DELETE as custom request type */
+    curl_easy_setopt(m_curl, CURLOPT_CUSTOMREQUEST, "DELETE");
 
     /* Perform the request */
     NS_LOG_INFO("Sending DELETE request to " << m_baseUrl << path);
-    int status = ExecuteRequest(m_curl_handle_delete, m_baseUrl + path, out);
-    NS_LOG_INFO("Received DELETE reply: " << out);
-
-    return status;
+    return ExecuteRequest(m_curl, m_baseUrl + path, out);
 }
 
 int
 RestApiHelper::ExecuteRequest(CURL* handle, const str& url, str& out)
 {
-    /* Check handle */
-    if (!handle)
-    {
-        NS_LOG_ERROR("curl_easy_init() failed\n");
-        return EXIT_FAILURE;
-    }
-
     long response_code;
 
     /* Set the destination URL of our request. */
@@ -182,20 +131,15 @@ RestApiHelper::ExecuteRequest(CURL* handle, const str& url, str& out)
     /* Perform the request */
     if (auto res = curl_easy_perform(handle); res != CURLE_OK)
     {
-        NS_LOG_ERROR("curl_easy_perform() failed: " << curl_easy_strerror(res) << "\n");
+        NS_LOG_ERROR("curl_easy_perform() failed: " << curl_easy_strerror(res) << ".");
         return EXIT_FAILURE;
     }
 
     /* Check HTTP response code */
-    if (auto res = curl_easy_getinfo(handle, CURLINFO_RESPONSE_CODE, &response_code);
-        res != CURLE_OK)
+    curl_easy_getinfo(handle, CURLINFO_RESPONSE_CODE, &response_code);
+    if (response_code != 200)
     {
-        NS_LOG_ERROR("curl_easy_getinfo() failed: " << curl_easy_strerror(res) << "\n");
-        return EXIT_FAILURE;
-    }
-    else if (response_code != 200)
-    {
-        NS_LOG_ERROR("Unexpected response code: " << response_code << "\n");
+        NS_LOG_ERROR("Expected response code 200, but got " << response_code << ".");
         return EXIT_FAILURE;
     }
 
