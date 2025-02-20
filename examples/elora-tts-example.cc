@@ -43,11 +43,10 @@ main(int argc, char* argv[])
      *  Simulation parameters  *
      ***************************/
 
-    std::string tenant = "ELoRa";
+    std::string app = "ELoRa";
     std::string apiAddr = "127.0.0.1";
     uint16_t apiPort = 1885;
-    std::string token = "NNSXS.DI5ELFVSXNP2QWRPAN55SU6XJRPNDKH6ITM3WHQ."
-                        "R2NMA6WZKMI7NKJXJTDS2N5TOD57FFEBGUKPKQWPRQ3SDRFLO6MQ";
+    std::string token = "...";
 
     uint16_t destPort = 1700;
 
@@ -64,11 +63,11 @@ main(int argc, char* argv[])
     /* Expose parameters to command line */
     {
         CommandLine cmd(__FILE__);
-        cmd.AddValue("tenant", "ChirpStack tenant name of this simulation", tenant);
-        cmd.AddValue("apiAddr", "ChirpStack REST API endpoint IP address", apiAddr);
-        cmd.AddValue("apiPort", "ChirpStack REST API endpoint IP address", apiPort);
-        cmd.AddValue("token", "ChirpStack API token (to be generated in ChirpStack UI)", token);
-        cmd.AddValue("destPort", "Port used by the ChirpStack Gateway Bridge", destPort);
+        cmd.AddValue("app", "The Things Stack application name of this simulation", app);
+        cmd.AddValue("apiAddr", "The Things Stack REST API endpoint IP address", apiAddr);
+        cmd.AddValue("apiPort", "The Things Stack REST API endpoint IP address", apiPort);
+        cmd.AddValue("token", "The Things Stack API token (to be generated in the UI)", token);
+        cmd.AddValue("destPort", "Port used by the The Things Stack Gateway Server", destPort);
         cmd.AddValue("periods", "Number of periods to simulate (1 period = 1 hour)", periods);
         cmd.AddValue("rings", "Number of gateway rings in hexagonal topology", gatewayRings);
         cmd.AddValue("range", "Radius of the device allocation disk around a gateway)", range);
@@ -106,6 +105,8 @@ main(int argc, char* argv[])
         LogComponentEnable("UdpForwarder", LOG_LEVEL_DEBUG);
         LogComponentEnable("TheThingsStackHelper", LOG_LEVEL_ALL);
         LogComponentEnable("RestApiHelper", LOG_LEVEL_ALL);
+        LogComponentEnable("ClassAEndDeviceLorawanMac", LOG_LEVEL_INFO);
+        LogComponentEnable("BaseEndDeviceLorawanMac", LOG_LEVEL_INFO);
         /* Monitor state changes of devices */
         LogComponentEnable("EloraTTSExample", LOG_LEVEL_ALL);
         /* Formatting */
@@ -291,8 +292,8 @@ main(int argc, char* argv[])
         exit(0);
     });
     ///////////////////// Register tenant, gateways, and devices on the real server
+    ttsHelper.SetApplication(app);
     ttsHelper.InitConnection(apiAddr, apiPort, token);
-    ttsHelper.SetNodes(nDevices, gateways.GetN());
     ttsHelper.Register(NodeContainer(endDevices, gateways));
 
     // Initialize SF emulating the ADR algorithm, then add variance to path loss

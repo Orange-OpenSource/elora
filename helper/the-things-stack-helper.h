@@ -30,12 +30,12 @@ class TheThingsStackHelper : public RestApiHelper
     struct session_t
     {
         // Registration info
-        str app = "ns-3-application";
+        str app = "Ns-3 Application";
 
         // Session IDs
         str appId;
-        int nDevices;
-        int nGateway;
+        std::vector<str> devIds;
+        std::vector<str> gwIds;
 
         // Session keys
         str netKey;
@@ -49,24 +49,22 @@ class TheThingsStackHelper : public RestApiHelper
 
     void CloseConnection(int signal) override;
 
-    int Register(NodeContainer c) const;
+    int Register(NodeContainer c);
 
-    int Register(Ptr<Node> node) const;
+    int Register(Ptr<Node> node);
 
     void SetApplication(str& name);
-
-    void SetNodes(int n, int gw);
 
   private:
     int DoConnect() override;
 
     int CreateApplication(const str& name);
 
-    int RegisterPriv(Ptr<Node> node) const;
+    int RegisterPriv(Ptr<Node> node);
 
-    int CreateDevice(Ptr<Node> node) const;
+    int CreateDevice(Ptr<Node> node);
 
-    int CreateGateway(Ptr<Node> node) const;
+    int CreateGateway(Ptr<Node> node);
 
     session_t m_session;
     uint64_t m_run;
