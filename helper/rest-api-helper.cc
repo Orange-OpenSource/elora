@@ -73,7 +73,7 @@ RestApiHelper::GET(const str& path, str& out) const
     curl_easy_setopt(m_curl, CURLOPT_CUSTOMREQUEST, NULL);
 
     /* Perform the request */
-    NS_LOG_INFO("Sending GET request to " << m_baseUrl << path);
+    NS_LOG_INFO("Sending request to " << m_baseUrl << path);
     return ExecuteRequest(m_curl, m_baseUrl + path, out);
 }
 
@@ -87,7 +87,7 @@ RestApiHelper::POST(const str& path, const str& body, str& out) const
     curl_easy_setopt(m_curl, CURLOPT_CUSTOMREQUEST, NULL);
 
     /* Perform the request */
-    NS_LOG_INFO("Sending POST request to " << m_baseUrl << path << ", with body: " << body);
+    NS_LOG_INFO("Sending request to " << m_baseUrl << path << ", with body: " << body);
     return ExecuteRequest(m_curl, m_baseUrl + path, out);
 }
 
@@ -101,7 +101,7 @@ RestApiHelper::PUT(const str& path, const str& body, str& out) const
     curl_easy_setopt(m_curl, CURLOPT_CUSTOMREQUEST, "PUT");
 
     /* Perform the request */
-    NS_LOG_INFO("Sending PUT request to " << m_baseUrl << path << ", with body: " << body);
+    NS_LOG_INFO("Sending request to " << m_baseUrl << path << ", with body: " << body);
     return ExecuteRequest(m_curl, m_baseUrl + path, out);
 }
 
@@ -114,7 +114,7 @@ RestApiHelper::DELETE(const str& path, str& out) const
     curl_easy_setopt(m_curl, CURLOPT_CUSTOMREQUEST, "DELETE");
 
     /* Perform the request */
-    NS_LOG_INFO("Sending DELETE request to " << m_baseUrl << path);
+    NS_LOG_INFO("Sending request to " << m_baseUrl << path);
     return ExecuteRequest(m_curl, m_baseUrl + path, out);
 }
 
