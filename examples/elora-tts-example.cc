@@ -1,5 +1,5 @@
 /*
- * This program produces real-time traffic to an external chirpstack server.
+ * This program produces real-time traffic to a private instance of the things stack.
  * Key elements are preceded by a comment with lots of dashes ( ///////////// )
  */
 
@@ -17,11 +17,11 @@
 #include "ns3/tap-bridge-helper.h"
 
 // lorawan imports
-#include "ns3/chirpstack-helper.h"
 #include "ns3/hex-grid-position-allocator.h"
 #include "ns3/lorawan-helper.h"
 #include "ns3/periodic-sender-helper.h"
 #include "ns3/range-position-allocator.h"
+#include "ns3/the-things-stack-helper.h"
 #include "ns3/udp-forwarder-helper.h"
 #include "ns3/urban-traffic-helper.h"
 
@@ -31,10 +31,10 @@
 using namespace ns3;
 using namespace lorawan;
 
-NS_LOG_COMPONENT_DEFINE_EXAMPLE_WITH_UTILITIES("EloraExample");
+NS_LOG_COMPONENT_DEFINE_EXAMPLE_WITH_UTILITIES("EloraTTSExample");
 
 /* Global declaration of connection helper for signal handling */
-ChirpstackHelper csHelper;
+TheThingsStackHelper ttsHelper;
 
 int
 main(int argc, char* argv[])
@@ -43,10 +43,11 @@ main(int argc, char* argv[])
      *  Simulation parameters  *
      ***************************/
 
-    std::string tenant = "ELoRa";
+    std::string app = "ELoRa";
     std::string apiAddr = "127.0.0.1";
-    uint16_t apiPort = 8090;
+    uint16_t apiPort = 1885;
     std::string token = "...";
+
     uint16_t destPort = 1700;
 
     double periods = 24; // H * D
@@ -62,11 +63,11 @@ main(int argc, char* argv[])
     /* Expose parameters to command line */
     {
         CommandLine cmd(__FILE__);
-        cmd.AddValue("tenant", "Chirpstack tenant name of this simulation", tenant);
-        cmd.AddValue("apiAddr", "Chirpstack REST API endpoint IP address", apiAddr);
-        cmd.AddValue("apiPort", "Chirpstack REST API endpoint IP address", apiPort);
-        cmd.AddValue("token", "Chirpstack API token (to be generated in Chirpstack UI)", token);
-        cmd.AddValue("destPort", "Port used by the Chirpstack Gateway Bridge", destPort);
+        cmd.AddValue("app", "The Things Stack application name of this simulation", app);
+        cmd.AddValue("apiAddr", "The Things Stack REST API endpoint IP address", apiAddr);
+        cmd.AddValue("apiPort", "The Things Stack REST API endpoint IP address", apiPort);
+        cmd.AddValue("token", "The Things Stack API token (to be generated in the UI)", token);
+        cmd.AddValue("destPort", "Port used by the The Things Stack Gateway Server", destPort);
         cmd.AddValue("periods", "Number of periods to simulate (1 period = 1 hour)", periods);
         cmd.AddValue("rings", "Number of gateway rings in hexagonal topology", gatewayRings);
         cmd.AddValue("range", "Radius of the device allocation disk around a gateway)", range);
@@ -78,12 +79,12 @@ main(int argc, char* argv[])
         cmd.AddValue("file", "Whether to enable .pcap tracing on gateways", file);
         cmd.AddValue("log", "Whether to enable logs", log);
         cmd.Parse(argc, argv);
-        if (auto f = getenv("CHIRPSTACK_API_TOKEN_FILE"); f)
+        if (auto f = getenv("THE_THINGS_STACK_API_TOKEN_FILE"); f)
         {
             std::ifstream file(f);
             std::getline(file, token);
         }
-        NS_ABORT_MSG_IF(token == "...", "Please provide an auth token for the ChirpStack API");
+        NS_ABORT_MSG_IF(token == "...", "Please provide an auth token for The Thing Stack API");
     }
 
     /* Apply global configurations */
@@ -102,12 +103,12 @@ main(int argc, char* argv[])
     {
         //!> Requirement: build ns3 with debug option
         LogComponentEnable("UdpForwarder", LOG_LEVEL_DEBUG);
-        LogComponentEnable("ChirpstackHelper", LOG_LEVEL_DEBUG);
+        LogComponentEnable("TheThingsStackHelper", LOG_LEVEL_ALL);
+        LogComponentEnable("RestApiHelper", LOG_LEVEL_ALL);
         LogComponentEnable("ClassAEndDeviceLorawanMac", LOG_LEVEL_INFO);
         LogComponentEnable("BaseEndDeviceLorawanMac", LOG_LEVEL_INFO);
-        // LogComponentEnable ("LoraFrameHeader", LOG_LEVEL_INFO);
         /* Monitor state changes of devices */
-        LogComponentEnable("EloraExample", LOG_LEVEL_ALL);
+        LogComponentEnable("EloraTTSExample", LOG_LEVEL_ALL);
         /* Formatting */
         LogComponentEnableAll(LOG_PREFIX_FUNC);
         LogComponentEnableAll(LOG_PREFIX_NODE);
@@ -286,14 +287,14 @@ main(int argc, char* argv[])
 
     ///////////////////// Signal handling
     OnInterrupt([](int signal) {
-        csHelper.CloseConnection(signal);
+        ttsHelper.CloseConnection(signal);
         OnInterrupt(SIG_DFL); // avoid multiple executions
         exit(0);
     });
     ///////////////////// Register tenant, gateways, and devices on the real server
-    csHelper.SetTenant(tenant);
-    csHelper.InitConnection(apiAddr, apiPort, token);
-    csHelper.Register(NodeContainer(endDevices, gateways));
+    ttsHelper.SetApplication(app);
+    ttsHelper.InitConnection(apiAddr, apiPort, token);
+    ttsHelper.Register(NodeContainer(endDevices, gateways));
 
     // Initialize SF emulating the ADR algorithm, then add variance to path loss
     std::vector<int> devPerSF(1, nDevices);

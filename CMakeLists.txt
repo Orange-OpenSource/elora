@@ -53,7 +53,9 @@ set(source_files
     helper/periodic-sender-helper.cc
     helper/one-shot-sender-helper.cc
     helper/urban-traffic-helper.cc
+    helper/rest-api-helper.cc
     helper/chirpstack-helper.cc
+    helper/the-things-stack-helper.cc
     third-party/packet_forwarder/base64.cc
     third-party/packet_forwarder/jitqueue.cc
     third-party/packet_forwarder/parson.cc
@@ -118,7 +120,9 @@ set(header_files
     helper/periodic-sender-helper.h
     helper/one-shot-sender-helper.h
     helper/urban-traffic-helper.h
+    helper/rest-api-helper.h
     helper/chirpstack-helper.h
+    helper/the-things-stack-helper.h
     third-party/packet_forwarder/base64.h
     third-party/packet_forwarder/jitqueue.h
     third-party/packet_forwarder/parson.h
