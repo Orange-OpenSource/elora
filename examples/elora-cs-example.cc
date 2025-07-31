@@ -55,7 +55,7 @@ main(int argc, char* argv[])
     int nDevices = 1;
     std::string sir = "CROCE";
     bool initializeSF = true;
-    bool testDev = false;
+    bool real = false;
     bool file = false; // Warning: will produce a file for each gateway
     bool log = false;
 
@@ -74,7 +74,7 @@ main(int argc, char* argv[])
         cmd.AddValue("sir", "Signal to Interference Ratio matrix used for interference", sir);
         cmd.AddValue("initSF", "Whether to initialize the SFs", initializeSF);
         cmd.AddValue("adr", "ns3::BaseEndDeviceLorawanMac::ADRBit");
-        cmd.AddValue("test", "Use test devices (5s period, 5B payload)", testDev);
+        cmd.AddValue("real", "Use realistic traffic [IEEE C802.16p-11/0102r2]", real);
         cmd.AddValue("file", "Whether to enable .pcap tracing on gateways", file);
         cmd.AddValue("log", "Whether to enable logs", log);
         cmd.Parse(argc, argv);
@@ -264,7 +264,7 @@ main(int argc, char* argv[])
         forwarderHelper.Install(gateways);
 
         // Install applications in EDs
-        if (testDev)
+        if (!real)
         {
             PeriodicSenderHelper appHelper;
             appHelper.SetPeriodGenerator(
