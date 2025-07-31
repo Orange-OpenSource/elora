@@ -299,7 +299,7 @@ ChirpStackHelper::CreateDeviceProfile(const str& name)
                   "\","
                   "    \"payloadCodecRuntime\": \"NONE\","
                   "    \"payloadCodecScript\": \"\","
-                  "    \"regParamsRevision\": \"RP002_1_0_3\","
+                  "    \"regParamsRevision\": \"RP002_1_0_4\","
                   "    \"region\": \"EU868\","
                   "    \"regionConfigId\": \"\","
                   "    \"relayCadPeriodicity\": \"SEC_1\","
