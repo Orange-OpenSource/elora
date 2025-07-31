@@ -9,6 +9,7 @@
 #include "rest-api-helper.h"
 
 #include "ns3/assert.h"
+#include "ns3/fatal-error.h"
 #include "ns3/log.h"
 
 #include <sstream>
