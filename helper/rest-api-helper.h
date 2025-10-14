@@ -10,6 +10,7 @@
 #define REST_API_HELPER_H
 
 #include <curl/curl.h>
+#include <stdint.h>
 #include <string>
 
 namespace ns3
@@ -27,7 +28,7 @@ class RestApiHelper
     using str = std::string;
 
   public:
-    int InitConnection(const str address, uint16_t port, const str token);
+    int InitConnection(const std::string address, uint16_t port, const std::string token);
 
   protected:
     RestApiHelper();

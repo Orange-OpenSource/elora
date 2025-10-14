@@ -44,7 +44,7 @@ RestApiHelper::~RestApiHelper()
 }
 
 int
-RestApiHelper::InitConnection(const str address, uint16_t port, const str token)
+RestApiHelper::InitConnection(const std::string address, uint16_t port, const std::string token)
 {
     NS_LOG_FUNCTION(this << address << (unsigned)port);
 
