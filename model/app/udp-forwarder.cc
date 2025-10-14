@@ -1290,6 +1290,10 @@ UdpForwarder::ReceiveDatagram(Ptr<Socket> sockDown)
     {
         gettimeofday(&current_unix_time, nullptr);
         get_concentrator_time(&current_concentrator_time, current_unix_time);
+        uint32_t time_us = current_concentrator_time.tv_sec * 1000000UL +
+                           current_concentrator_time.tv_usec; /* convert time in µs */
+        NS_LOG_DEBUG("current_concentrator_time=" << time_us << ", count_us=" << txpkt.count_us
+                                                  << ", time_diff=" << txpkt.count_us - time_us);
         jit_result = jit_enqueue(&jit_queue, &current_concentrator_time, &txpkt, downlink_type);
         if (jit_result != JIT_ERROR_OK)
         {
