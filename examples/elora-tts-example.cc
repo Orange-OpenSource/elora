@@ -123,8 +123,10 @@ main(int argc, char* argv[])
     Ptr<NakagamiPropagationLossModel> rayleigh;
     Ptr<LoraChannel> channel;
     {
-        // Delay obtained from distance and speed of light in vacuum (constant)
-        Ptr<PropagationDelayModel> delay = CreateObject<ConstantSpeedPropagationDelayModel>();
+        // Delay obtained from distance and speed of light in air
+        double refraction = 1.0003;
+        auto delay = CreateObject<ConstantSpeedPropagationDelayModel>();
+        delay->SetAttribute("Speed", DoubleValue(299792458 / refraction));
 
         // This one is empirical and it encompasses average loss due to distance, shadowing (i.e.
         // obstacles), weather, height

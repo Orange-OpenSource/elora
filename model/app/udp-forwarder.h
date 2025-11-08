@@ -286,6 +286,16 @@ class UdpForwarder : public Application
     int send_tx_ack(uint8_t token_h, uint8_t token_l, enum jit_error_e error);
 
     static void print_tx_status(uint8_t tx_status);
+
+    /* -------------------------------------------------------------------------- */
+    /* -------------------- GW OS & HARDWARE EMULATION -------------------------- */
+
+    static uint32_t GetRawConcentratorTimestamp(); //!< Emulates the internal concentrator 32bit
+                                                   //!< counter used to timestamp receptions such
+                                                   //!< that the server can use it as reference for
+                                                   //!< downlink scheduling timestamps
+
+    static void GetTimeOfDay(timeval* tv); //!< Emulate Unix's gettimeofday function with ns time
 };
 
 } // namespace lorawan

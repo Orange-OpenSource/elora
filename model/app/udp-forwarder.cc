@@ -110,14 +110,19 @@ UdpForwarder::ReceiveFromLora(Ptr<LorawanMac> mac, Ptr<const Packet> packet)
     LoraTag tag;
     pktcpy->RemovePacketTag(tag);
 
-    timeval raw_time;
-    gettimeofday(&raw_time, nullptr);
+    /* The following timestamp is used as reference by the server to schedule downlinks for
+     * reception windows openings. In the simulation we have 0 processing delay, the packet arrives
+     * here as soon as gateway reception completes. Devices start the receive window timers as they
+     * stop transmitting, and we get here just after the propagation delay of light in the air
+     * (negligible, ~50μs for 15km scaling linearly). */
+    uint32_t raw_timestamp = GetRawConcentratorTimestamp();
+    uint32_t timestamp_correction = 0;
 
     lgw_pkt_rx_s p;
     p.freq_hz = (uint32_t)tag.GetFrequency() + 0.5;
     p.if_chain = 0;
     p.status = STAT_CRC_OK;
-    p.count_us = raw_time.tv_sec * 1000000UL + raw_time.tv_usec; /* convert time in µs */
+    p.count_us = raw_timestamp - timestamp_correction;
     p.rf_chain = 0;
     p.modulation = MOD_LORA;
     p.bandwidth = BW_125KHZ;
@@ -1249,7 +1254,7 @@ UdpForwarder::ReceiveDatagram(Ptr<Socket> sockDown)
     json_value_free(root_val);
 
     /* select TX mode */
-    txpkt.tx_mode = IMMEDIATE;
+    txpkt.tx_mode = TIMESTAMPED;
 
     /* record measurement data */
     meas_dw_dgram_rcv += 1;          /* count only datagrams with no JSON errors */
@@ -1288,12 +1293,11 @@ UdpForwarder::ReceiveDatagram(Ptr<Socket> sockDown)
     /* insert packet to be sent into JIT queue */
     if (jit_result == JIT_ERROR_OK)
     {
-        gettimeofday(&current_unix_time, nullptr);
-        get_concentrator_time(&current_concentrator_time, current_unix_time);
-        uint32_t time_us = current_concentrator_time.tv_sec * 1000000UL +
-                           current_concentrator_time.tv_usec; /* convert time in µs */
+        uint32_t time_us = GetRawConcentratorTimestamp();
         NS_LOG_DEBUG("current_concentrator_time=" << time_us << ", count_us=" << txpkt.count_us
                                                   << ", time_diff=" << txpkt.count_us - time_us);
+        GetTimeOfDay(&current_unix_time);
+        get_concentrator_time(&current_concentrator_time, current_unix_time);
         jit_result = jit_enqueue(&jit_queue, &current_concentrator_time, &txpkt, downlink_type);
         if (jit_result != JIT_ERROR_OK)
         {
@@ -1321,7 +1325,7 @@ UdpForwarder::ThreadJit()
     uint8_t tx_status;
 
     /* transfer data and metadata to the concentrator, and schedule TX */
-    gettimeofday(&current_unix_time, nullptr);
+    GetTimeOfDay(&current_unix_time);
     get_concentrator_time(&current_concentrator_time, current_unix_time);
     jit_result = jit_peek(&jit_queue, &current_concentrator_time, &pkt_index);
     if (jit_result == JIT_ERROR_OK)
@@ -1678,6 +1682,7 @@ UdpForwarder::LgwSend(struct lgw_pkt_tx_s pkt_data)
     bool lgw_is_started = true;
     LoraTag tag;
     Ptr<Packet> pkt;
+    uint32_t count_trig = 0; /* timestamp value in trigger mode for TX start delay */
     bool tx_allowed = false;
 
     /* check if the concentrator is running */
@@ -1747,6 +1752,12 @@ UdpForwarder::LgwSend(struct lgw_pkt_tx_s pkt_data)
         return LGW_HAL_ERROR;
     }
 
+    /* timestamp trigger value */
+    if (pkt_data.tx_mode == TIMESTAMPED)
+    {
+        count_trig = pkt_data.count_us;
+    }
+
     switch (pkt_data.datarate)
     {
     case DR_LORA_SF7:
@@ -1778,7 +1789,9 @@ UdpForwarder::LgwSend(struct lgw_pkt_tx_s pkt_data)
     tx_allowed = true;
     if (tx_allowed)
     {
-        m_mac->Send(pkt);
+        /* The packet is scheduled at count_trig by the gateway chip */
+        uint32_t delay_us = count_trig - GetRawConcentratorTimestamp();
+        Simulator::Schedule(MicroSeconds(delay_us), &GatewayLorawanMac::Send, m_mac, pkt);
     }
     else
     {
@@ -1917,6 +1930,22 @@ UdpForwarder::print_tx_status(uint8_t tx_status)
         NS_LOG_INFO("[jit] lgw_status returned UNKNOWN (" << tx_status << ")");
         break;
     }
+}
+
+uint32_t
+UdpForwarder::GetRawConcentratorTimestamp()
+{
+    /* cast positive int64_t to uint32_t, truncates OK */
+    return Simulator::Now().GetMicroSeconds();
+}
+
+void
+UdpForwarder::GetTimeOfDay(timeval* tv)
+{
+    /* emulate unix gettimeofday */
+    auto current_time_us = Simulator::Now().GetMicroSeconds();
+    tv->tv_sec = current_time_us / 1000000UL;
+    tv->tv_usec = current_time_us % 1000000UL;
 }
 
 } // namespace lorawan
