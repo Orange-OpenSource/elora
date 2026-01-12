@@ -173,21 +173,6 @@ LorawanMacHelper::ConfigureForEuRegion(Ptr<LorawanMac> mac) const
     channelHelper->AddChannel(1, lc1);
     channelHelper->AddChannel(2, lc2);
 
-    ////////////////////////
-    // Addtional channels //
-    ////////////////////////
-
-    Ptr<LogicalChannel> lc3 = Create<LogicalChannel>(867100000, 0, 5);
-    Ptr<LogicalChannel> lc4 = Create<LogicalChannel>(867300000, 0, 5);
-    Ptr<LogicalChannel> lc5 = Create<LogicalChannel>(867500000, 0, 5);
-    Ptr<LogicalChannel> lc6 = Create<LogicalChannel>(867700000, 0, 5);
-    Ptr<LogicalChannel> lc7 = Create<LogicalChannel>(867900000, 0, 5);
-    channelHelper->AddChannel(3, lc3);
-    channelHelper->AddChannel(4, lc4);
-    channelHelper->AddChannel(5, lc5);
-    channelHelper->AddChannel(6, lc6);
-    channelHelper->AddChannel(7, lc7);
-
     mac->SetLogicalChannelManager(channelHelper);
 
     ///////////////////////////////////////////////
