@@ -1,0 +1,48 @@
+name: ci
+
+on:
+  push:
+    branches:
+      - master
+    tags:
+      - v*.*.*
+
+jobs:
+  docker:
+    if: ${{ github.repository == 'non-det-alle/elora' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          repository: non-det-alle/elora-docker
+          token: ${{ secrets.ELORA_DOCKER_TOKEN }}
+          submodules: true
+      - run: |
+          git -C ./build/elora/ fetch --depth 1 origin "${{ github.ref }}"
+          git -C ./build/elora/ checkout FETCH_HEAD
+      - run: |
+          tag=$(< ./build/elora/NS3-VERSION) && tag=${tag#release }
+          git -C ./build/ns-3-dev/ fetch --depth 1 origin refs/tags/$tag
+          git -C ./build/ns-3-dev/ checkout FETCH_HEAD
+      - env:
+          CI_COMMIT_MESSAGE: "pull elora latest changes"
+          CI_COMMIT_AUTHOR: github-actions[bot]
+          CI_COMMIT_EMAIL: username@users.noreply.github.com
+        run: |
+          if [[ `git status --porcelain --untracked-files=no` ]]; then
+            git config --global user.name "${{ env.CI_COMMIT_AUTHOR }}"
+            git config --global user.email "${{ env.CI_COMMIT_EMAIL }}"
+            git commit -a -m "${{ env.CI_COMMIT_MESSAGE }}"
+          else
+            echo "no changes detected after checkout"
+          fi
+      - run: |
+          tag=""
+          if [[ "${{ startsWith(github.ref, 'refs/tags/') }}" == "true" ]]; then
+            tag="${{ github.ref }}" && tag=${tag#refs/tags/}
+            echo "pushing new tag $tag to origin"
+            git tag $tag && git push origin tag $tag
+          else
+            echo "pushing new commit to origin"
+            git push
+          fi
