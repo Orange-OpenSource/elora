@@ -9,12 +9,12 @@ on:
 
 jobs:
   docker:
-    if: ${{ github.repository == 'non-det-alle/elora' }}
+    if: ${{ github.repository == 'nondetalle/elora' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
         with:
-          repository: non-det-alle/elora-docker
+          repository: nondetalle/elora-docker
           token: ${{ secrets.ELORA_DOCKER_TOKEN }}
           submodules: true
       - run: |

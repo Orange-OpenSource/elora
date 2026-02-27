@@ -1,6 +1,6 @@
 # ELoRa: An end-to-end emulator for LoRaWAN server stacks
 
->**If you just to try it out, we refer you to a quicker installation running the [emulator image with Docker Compose](https://github.com/non-det-alle/elora-docker).**
+>**If you just to try it out, we refer you to a quicker installation running the [emulator image with Docker Compose](https://github.com/nondetalle/elora-docker).**
 
 This is an in-depth traffic emulator for LoRaWAN traffic compatible with both [ChirpStack](https://www.chirpstack.io/ "ChirpStack, open-source LoRaWAN® Network Server") and [The Things Stack](https://www.thethingsindustries.com/docs/, "The Things Stack Documentation"), the most widespread open-source implementation of a real LoRaWAN server stack.
 
