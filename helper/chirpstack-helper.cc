@@ -12,6 +12,7 @@
 #include "ns3/base-end-device-lorawan-mac.h"
 #include "ns3/gateway-lorawan-mac.h"
 #include "ns3/log.h"
+#include "ns3/lora-application.h"
 #include "ns3/lora-net-device.h"
 #include "ns3/parson.h"
 #include "ns3/rng-seed-manager.h"
@@ -428,6 +429,15 @@ ChirpStackHelper::CreateDevice(Ptr<Node> node) const
     uint64_t id = (m_run << 48) + node->GetId();
     snprintf(eui, 17, "%016lx", id);
 
+    double bps = 0;
+
+    if (auto app = DynamicCast<LoraApplication>(node->GetApplication(0)); app)
+    {
+        auto payoadBits = double(app->GetPacketSize()) * 8;
+        auto interval = app->GetInterval().GetSeconds();
+        bps = payoadBits / interval;
+    }
+
     str payload = "{"
                   "  \"device\": {"
                   "    \"applicationId\": \"" +
@@ -445,7 +455,10 @@ ChirpStackHelper::CreateDevice(Ptr<Node> node) const
                   std::to_string((unsigned)id) +
                   "\","
                   "    \"skipFcntCheck\": true,"
-                  "    \"tags\": {},"
+                  "    \"tags\": {"
+                  "      \"bps\": \"" +
+                  std::to_string(bps) +
+                  "\"    },"
                   "    \"variables\": {}"
                   "  }"
                   "}";
