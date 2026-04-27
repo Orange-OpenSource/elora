@@ -43,6 +43,8 @@ main(int argc, char* argv[])
      *  Simulation parameters  *
      ***************************/
 
+    std::string tapName = "ns3-tap";
+
     std::string app = "ELoRa";
     std::string apiAddr = "127.0.0.1";
     uint16_t apiPort = 1885;
@@ -63,6 +65,7 @@ main(int argc, char* argv[])
     /* Expose parameters to command line */
     {
         CommandLine cmd(__FILE__);
+        cmd.AddValue("tapName", "Name of the TAP device created by the simulation.", tapName);
         cmd.AddValue("app", "The Things Stack application name of this simulation", app);
         cmd.AddValue("apiAddr", "The Things Stack REST API endpoint IP address", apiAddr);
         cmd.AddValue("apiPort", "The Things Stack REST API endpoint IP address", apiPort);
@@ -221,7 +224,7 @@ main(int argc, char* argv[])
     ///////////////// Attach a Tap-bridge to outside the simulation to the server csma device
     TapBridgeHelper tapBridge;
     tapBridge.SetAttribute("Mode", StringValue("ConfigureLocal"));
-    tapBridge.SetAttribute("DeviceName", StringValue("ns3-tap"));
+    tapBridge.SetAttribute("DeviceName", StringValue(tapName));
     tapBridge.Install(exitnode, exitnode->GetDevice(0));
 
     /* Radio side (between end devicees and gateways) */

@@ -1791,7 +1791,7 @@ UdpForwarder::LgwSend(struct lgw_pkt_tx_s pkt_data)
     {
         /* The packet is scheduled at count_trig by the gateway chip */
         uint32_t delay_us = count_trig - GetRawConcentratorTimestamp();
-        Simulator::Schedule(MicroSeconds(delay_us), &GatewayLorawanMac::Send, m_mac, pkt);
+        Simulator::Schedule(MicroSeconds(delay_us + 1), &GatewayLorawanMac::Send, m_mac, pkt);
     }
     else
     {
