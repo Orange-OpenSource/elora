@@ -260,6 +260,11 @@ class BaseEndDeviceLorawanMac : public LorawanMac
     // Protected MAC Layer context //
     /////////////////////////////////
 
+    /**
+     * Uplink frame counter of the device
+     */
+    uint16_t m_fCnt;
+
     /* Counter for keepalive purposes */
     uint16_t m_ADRACKCnt;
 
@@ -453,11 +458,6 @@ class BaseEndDeviceLorawanMac : public LorawanMac
      * Whether this device's data rate should be controlled by the NS.
      */
     bool m_ADRBit;
-
-    /**
-     * Uplink frame counter of the device
-     */
-    uint16_t m_fCnt;
 
     ////////////////////////////////
     // Private MAC Layer settings //
