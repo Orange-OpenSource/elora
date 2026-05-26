@@ -1,8 +1,7 @@
 /*
- * This file includes testing for the following components:
- * - EndDeviceServer
- * - GatewayServer
- * - NetworkServer
+ * Copyright (c) 2018 University of Padova
+ *
+ * SPDX-License-Identifier: GPL-2.0-only
  *
  * Author: Davide Magrin <magrinda@dei.unipd.it>
  *
@@ -11,44 +10,60 @@
  *                              <alessandro.aimi@cnam.fr>
  */
 
-// Include headers of classes to test
+/*
+ * This file includes testing for the following components:
+ * - NetworkServer
+ */
+
 #include "utilities.h"
 
-#include "ns3/callback.h"
-#include "ns3/core-module.h"
-#include "ns3/log.h"
-#include "ns3/network-server-helper.h"
-#include "ns3/network-server.h"
-
 // An essential include is test.h
+#include "ns3/application.h"
+#include "ns3/simulator.h"
 #include "ns3/test.h"
+
+// Include headers of classes to test
+#include "ns3/class-a-end-device-lorawan-mac.h"
 
 using namespace ns3;
 using namespace lorawan;
 
 NS_LOG_COMPONENT_DEFINE("NetworkServerTestSuite");
 
-///////////////////////////
-// NetworkServer testing //
-///////////////////////////
-
+/**
+ * @ingroup lorawan
+ *
+ * It verifies that the NetworkServer application can receive packets sent in uplink by devices
+ */
 class UplinkPacketTest : public TestCase
 {
   public:
-    UplinkPacketTest();
-    ~UplinkPacketTest() override;
+    UplinkPacketTest();           //!< Default constructor
+    ~UplinkPacketTest() override; //!< Destructor
 
+    /**
+     * Callback for tracing ReceivedPacket.
+     *
+     * @param packet The packet received.
+     */
     void ReceivedPacket(Ptr<const Packet> packet);
+
+    /**
+     * Send a packet from the input end device.
+     *
+     * @param endDevice A pointer to the end device Node.
+     */
     void SendPacket(Ptr<Node> endDevice);
 
   private:
     void DoRun() override;
-    bool m_receivedPacket = false;
+
+    bool m_receivedPacket = false; //!< Set to true if a packet is received by the server
 };
 
 // Add some help text to this case to describe what it is intended to test
 UplinkPacketTest::UplinkPacketTest()
-    : TestCase("Verify that the NetworkServer can receive"
+    : TestCase("Verify that the NetworkServer application can receive"
                " packets sent in the uplink by devices")
 {
 }
@@ -61,7 +76,7 @@ UplinkPacketTest::~UplinkPacketTest()
 void
 UplinkPacketTest::ReceivedPacket(Ptr<const Packet> packet)
 {
-    NS_LOG_DEBUG("Received a packet at the NS");
+    NS_LOG_DEBUG("Received a packet at the network server");
     m_receivedPacket = true;
 }
 
@@ -103,31 +118,51 @@ UplinkPacketTest::DoRun()
     NS_ASSERT(m_receivedPacket == true);
 }
 
-////////////////////////
-// DownlinkPacketTest //
-////////////////////////
-
+/**
+ * @ingroup lorawan
+ *
+ * It verifies that devices requesting an acknowledgment receive a reply from the network server
+ */
 class DownlinkPacketTest : public TestCase
 {
   public:
-    DownlinkPacketTest();
-    ~DownlinkPacketTest() override;
+    DownlinkPacketTest();           //!< Default constructor
+    ~DownlinkPacketTest() override; //!< Destructor
 
+    /**
+     * Record the exit status of a MAC layer packet retransmission process of an end device.
+     *
+     * This trace sink is only used here to determine whether an ack was received by the end device
+     * after sending a package requiring an acknowledgement.
+     *
+     * @param requiredTransmissions Number of transmissions attempted during the process.
+     * @param success Whether the retransmission procedure was successful.
+     * @param time Timestamp of the initial transmission attempt.
+     * @param packet The packet being retransmitted.
+     */
     void ReceivedPacketAtEndDevice(uint8_t requiredTransmissions,
                                    bool success,
                                    Time time,
                                    Ptr<Packet> packet);
+
+    /**
+     * Send a packet from the input end device.
+     *
+     * @param endDevice A pointer to the end device Node.
+     * @param requestAck Whether to require an acknowledgement from the server.
+     */
     void SendPacket(Ptr<Node> endDevice, bool requestAck);
 
   private:
     void DoRun() override;
-    bool m_receivedPacketAtEd = false;
+
+    bool m_receivedPacketAtEd = false; //!< Set to true if a packet is received by the end device
 };
 
 // Add some help text to this case to describe what it is intended to test
 DownlinkPacketTest::DownlinkPacketTest()
     : TestCase("Verify that devices requesting an acknowledgment receive"
-               " a reply from the Network Server.")
+               " a reply from the network server.")
 {
 }
 
@@ -142,7 +177,7 @@ DownlinkPacketTest::ReceivedPacketAtEndDevice(uint8_t requiredTransmissions,
                                               Time time,
                                               Ptr<Packet> packet)
 {
-    NS_LOG_DEBUG("Received a packet at the ED");
+    NS_LOG_DEBUG("Received a packet at the end device");
     m_receivedPacketAtEd = success;
 }
 
@@ -172,7 +207,7 @@ DownlinkPacketTest::DoRun()
     NodeContainer gateways = components.gateways;
     Ptr<Node> nsNode = components.nsNode;
 
-    // Connect the ED's trace source for received packets
+    // Connect the end device's trace source for received packets
     DynamicCast<BaseEndDeviceLorawanMac>(
         DynamicCast<LoraNetDevice>(endDevices.Get(0)->GetDevice(0))->GetMac())
         ->TraceConnectWithoutContext(
@@ -189,29 +224,46 @@ DownlinkPacketTest::DoRun()
     NS_ASSERT(m_receivedPacketAtEd);
 }
 
-//////////////////////////
-// LinkCheckSupportTest //
-//////////////////////////
-
+/**
+ * @ingroup lorawan
+ *
+ * It verifies that the NetworkServer application correctly responds to LinkCheck requests
+ */
 class LinkCheckTest : public TestCase
 {
   public:
-    LinkCheckTest();
-    ~LinkCheckTest() override;
+    LinkCheckTest();           //!< Default constructor
+    ~LinkCheckTest() override; //!< Destructor
 
-    void LastKnownGatewayCount(int newValue, int oldValue);
+    /**
+     * Trace changes in the last known gateway count variable (updated on reception of
+     * LinkCheckAns MAC commands) of an end device.
+     *
+     * @param newValue The updated value.
+     * @param oldValue The previous value.
+     */
+    void LastKnownGatewayCount(uint8_t newValue, uint8_t oldValue);
 
+    /**
+     * Send a packet containing a LinkCheckReq MAC command from the input end device.
+     *
+     * @param endDevice A pointer to the end device Node.
+     * @param requestAck Whether to require an acknowledgement from the server.
+     */
     void SendPacket(Ptr<Node> endDevice, bool requestAck);
 
   private:
     void DoRun() override;
-    bool m_receivedPacketAtEd = false;
-    int m_numberOfGatewaysThatReceivedPacket = 0;
+    bool m_receivedPacketAtEd = false; //!< Set to true if a packet containing a LinkCheckAns MAC
+                                       //!< command is received by the end device
+    uint8_t m_numberOfGatewaysThatReceivedPacket =
+        0; //!< Stores the number of gateways that received the last packet carrying a
+           //!< LinkCheckReq MAC command
 };
 
 // Add some help text to this case to describe what it is intended to test
 LinkCheckTest::LinkCheckTest()
-    : TestCase("Verify that the NetworkServer correctly responds to "
+    : TestCase("Verify that the NetworkServer application correctly responds to "
                "LinkCheck requests")
 {
 }
@@ -222,9 +274,9 @@ LinkCheckTest::~LinkCheckTest()
 }
 
 void
-LinkCheckTest::LastKnownGatewayCount(int newValue, int oldValue)
+LinkCheckTest::LastKnownGatewayCount(uint8_t newValue, uint8_t oldValue)
 {
-    NS_LOG_DEBUG("Updated Gateway Count");
+    NS_LOG_DEBUG("Updated gateway count");
     m_receivedPacketAtEd = true;
 
     m_numberOfGatewaysThatReceivedPacket = newValue;
@@ -235,10 +287,12 @@ LinkCheckTest::SendPacket(Ptr<Node> endDevice, bool requestAck)
 {
     auto macLayer = DynamicCast<BaseEndDeviceLorawanMac>(
         DynamicCast<LoraNetDevice>(endDevice->GetDevice(0))->GetMac());
+
     if (requestAck)
     {
         macLayer->SetFType(LorawanMacHeader::CONFIRMED_DATA_UP);
     }
+
     macLayer->AddMacCommand(Create<LinkCheckReq>());
     macLayer->Send(Create<Packet>(20));
 }
@@ -258,7 +312,7 @@ LinkCheckTest::DoRun()
     NodeContainer gateways = components.gateways;
     Ptr<Node> nsNode = components.nsNode;
 
-    // Connect the ED's trace source for Last known Gateway Count
+    // Connect the end device's trace source for last known gateway count
     DynamicCast<BaseEndDeviceLorawanMac>(
         DynamicCast<LoraNetDevice>(endDevices.Get(0)->GetDevice(0))->GetMac())
         ->TraceConnectWithoutContext("LastKnownGatewayCount",
@@ -274,44 +328,102 @@ LinkCheckTest::DoRun()
     NS_ASSERT(m_receivedPacketAtEd);
 }
 
-/**************
- * Test Suite *
- **************/
+/**
+ * @ingroup lorawan
+ *
+ * It verifies that the NetworkServer application responds to uplinks with the ADRACKReq bit set
+ */
+class AdrAckReqTest : public TestCase
+{
+  public:
+    AdrAckReqTest();           //!< Default constructor
+    ~AdrAckReqTest() override; //!< Destructor
 
-// The TestSuite class names the TestSuite, identifies what type of TestSuite,
-// and enables the TestCases to be run. Typically, only the constructor for
-// this class must be defined
+  private:
+    void DoRun() override;
 
+    /**
+     * Callback for packet reception by the end device MAC layer
+     *
+     * @param packet The received packet
+     */
+    void OnReception(Ptr<const Packet> packet);
+
+    bool m_adrAckReceived = false; //!< Set to true if a downlink packet is received by the end
+                                   //!< device after setting the uplink ADRACKReq bit
+};
+
+AdrAckReqTest::AdrAckReqTest()
+    : TestCase("Verify that the NetworkServer responds to uplinks with the ADRACKReq bit set")
+{
+}
+
+AdrAckReqTest::~AdrAckReqTest()
+{
+}
+
+void
+AdrAckReqTest::OnReception(Ptr<const Packet> packet)
+{
+    m_adrAckReceived = true;
+}
+
+void
+AdrAckReqTest::DoRun()
+{
+    NS_LOG_DEBUG("AdrAckReqTest");
+    auto components = InitializeNetwork(1, 1);
+    auto ed = components.endDevices.Get(0);
+    auto netdev = DynamicCast<LoraNetDevice>(ed->GetDevice(0));
+    auto mac = DynamicCast<ClassAEndDeviceLorawanMac>(netdev->GetMac());
+    // Turn-off ADR downlinks from the server, ADRACKReq mechanism still works
+    mac->SetAttribute("ADR", BooleanValue(false));
+    auto cb = MakeCallback(&AdrAckReqTest::OnReception, this);
+    mac->TraceConnectWithoutContext("ReceivedPacket", cb);
+    // Trigger ADRACKReq bit set
+    for (uint16_t fCnt = 0; fCnt <= ADR_ACK_LIMIT; ++fCnt)
+    {
+        Simulator::Schedule(Minutes(20), &ClassAEndDeviceLorawanMac::Send, mac, Create<Packet>(20));
+        Simulator::Run();
+    }
+    NS_TEST_EXPECT_MSG_EQ(m_adrAckReceived, true, "No downlink received by the end device");
+}
+
+/**
+ * @ingroup lorawan
+ *
+ * The TestSuite class names the TestSuite, identifies what type of TestSuite, and enables the
+ * TestCases to be run. Typically, only the constructor for this class must be defined
+ */
 class NetworkServerTestSuite : public TestSuite
 {
   public:
-    NetworkServerTestSuite();
+    NetworkServerTestSuite(); //!< Default constructor
 };
 
 NetworkServerTestSuite::NetworkServerTestSuite()
     : TestSuite("network-server", Type::UNIT)
 {
-    LogComponentEnable("NetworkServerTestSuite", LOG_LEVEL_DEBUG);
+    // Activate only at need, as these can create problems among test suites when running ./test.py
+    // LogComponentEnable("NetworkServerTestSuite", LOG_LEVEL_DEBUG);
+    // LogComponentEnable("NetworkServer", LOG_LEVEL_ALL);
+    // LogComponentEnable("NetworkStatus", LOG_LEVEL_ALL);
+    // LogComponentEnable("NetworkScheduler", LOG_LEVEL_ALL);
+    // LogComponentEnable("NetworkController", LOG_LEVEL_ALL);
+    // LogComponentEnable("NetworkControllerComponent", LOG_LEVEL_ALL);
+    // LogComponentEnable("LoraNetDevice", LOG_LEVEL_ALL);
+    // LogComponentEnable("GatewayLorawanMac", LOG_LEVEL_ALL);
+    // LogComponentEnable("BaseEndDeviceLorawanMac", LOG_LEVEL_ALL);
+    // LogComponentEnable("EndDeviceLoraPhy", LOG_LEVEL_ALL);
+    // LogComponentEnable("EndDeviceStatus", LOG_LEVEL_ALL);
+    // LogComponentEnableAll(LOG_PREFIX_FUNC);
+    // LogComponentEnableAll(LOG_PREFIX_NODE);
+    // LogComponentEnableAll(LOG_PREFIX_TIME);
 
-    LogComponentEnable("NetworkServer", LOG_LEVEL_ALL);
-    LogComponentEnable("NetworkStatus", LOG_LEVEL_ALL);
-    LogComponentEnable("NetworkScheduler", LOG_LEVEL_ALL);
-    LogComponentEnable("NetworkController", LOG_LEVEL_ALL);
-    LogComponentEnable("NetworkControllerComponent", LOG_LEVEL_ALL);
-    LogComponentEnable("LoraNetDevice", LOG_LEVEL_ALL);
-    LogComponentEnable("GatewayLorawanMac", LOG_LEVEL_ALL);
-    LogComponentEnable("BaseEndDeviceLorawanMac", LOG_LEVEL_ALL);
-    LogComponentEnable("EndDeviceLoraPhy", LOG_LEVEL_ALL);
-    LogComponentEnable("EndDeviceStatus", LOG_LEVEL_ALL);
-
-    LogComponentEnableAll(LOG_PREFIX_FUNC);
-    LogComponentEnableAll(LOG_PREFIX_NODE);
-    LogComponentEnableAll(LOG_PREFIX_TIME);
-
-    // TestDuration for TestCase can be QUICK, EXTENSIVE or TAKES_FOREVER
     AddTestCase(new UplinkPacketTest, Duration::QUICK);
     AddTestCase(new DownlinkPacketTest, Duration::QUICK);
     AddTestCase(new LinkCheckTest, Duration::QUICK);
+    AddTestCase(new AdrAckReqTest, Duration::QUICK);
 }
 
 // Do not forget to allocate an instance of this TestSuite

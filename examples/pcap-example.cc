@@ -49,9 +49,6 @@ main(int argc, char* argv[])
      *  Setup  *
      ***********/
 
-    // Set the EDs to require Data Rate control from the NS
-    Config::SetDefault("ns3::BaseEndDeviceLorawanMac::ADRBit", BooleanValue(true));
-
     // Create the time value from the period
     Time appPeriod = Seconds(appPeriodSeconds);
     Time simulationTime = Seconds(simulationTimeSeconds);

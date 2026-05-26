@@ -66,7 +66,6 @@ main(int argc, char* argv[])
                  "ns3::AdrComponent::MultiplePacketsCombiningMethod");
     cmd.AddValue("HistoryRange", "ns3::AdrComponent::HistoryRange");
     cmd.AddValue("FType", "ns3::BaseEndDeviceLorawanMac::FType");
-    cmd.AddValue("ADRBackoff", "ns3::BaseEndDeviceLorawanMac::ADRBackoff");
     cmd.AddValue("ChangeTransmissionPower", "ns3::AdrComponent::ChangeTransmissionPower");
     cmd.AddValue("AdrEnabled", "Whether to enable ADR", adrEnabled);
     cmd.AddValue("nDevices", "Number of devices to simulate", nDevices);
@@ -110,9 +109,6 @@ main(int argc, char* argv[])
     LogComponentEnableAll(LOG_PREFIX_FUNC);
     LogComponentEnableAll(LOG_PREFIX_NODE);
     LogComponentEnableAll(LOG_PREFIX_TIME);
-
-    // Set the EDs to require Data Rate control from the NS
-    Config::SetDefault("ns3::BaseEndDeviceLorawanMac::ADRBit", BooleanValue(true));
 
     // Create a simple wireless channel
     ///////////////////////////////////

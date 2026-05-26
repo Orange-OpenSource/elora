@@ -77,7 +77,7 @@ main(int argc, char* argv[])
         cmd.AddValue("devices", "Number of end devices to include in the simulation", nDevices);
         cmd.AddValue("sir", "Signal to Interference Ratio matrix used for interference", sir);
         cmd.AddValue("initSF", "Whether to initialize the SFs", initializeSF);
-        cmd.AddValue("adr", "ns3::BaseEndDeviceLorawanMac::ADRBit");
+        cmd.AddValue("adr", "ns3::BaseEndDeviceLorawanMac::ADR");
         cmd.AddValue("real", "Use realistic traffic [IEEE C802.16p-11/0102r2]", real);
         cmd.AddValue("file", "Whether to enable .pcap tracing on gateways", file);
         cmd.AddValue("log", "Whether to enable logs", log);
@@ -94,7 +94,6 @@ main(int argc, char* argv[])
     ///////////////// Real-time operation, necessary to interact with the outside world.
     GlobalValue::Bind("SimulatorImplementationType", StringValue("ns3::RealtimeSimulatorImpl"));
     GlobalValue::Bind("ChecksumEnabled", BooleanValue(true));
-    Config::SetDefault("ns3::BaseEndDeviceLorawanMac::ADRBackoff", BooleanValue(true));
     Config::SetDefault("ns3::BaseEndDeviceLorawanMac::EnableCryptography", BooleanValue(true));
     Config::SetDefault("ns3::BaseEndDeviceLorawanMac::FType",
                        EnumValue(LorawanMacHeader::CONFIRMED_DATA_UP));

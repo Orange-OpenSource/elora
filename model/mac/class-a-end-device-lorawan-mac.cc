@@ -46,8 +46,7 @@ ClassAEndDeviceLorawanMac::GetTypeId()
 }
 
 ClassAEndDeviceLorawanMac::ClassAEndDeviceLorawanMac()
-    : m_recvWinSymb(8),
-      // LoRaWAN default
+    : // LoRaWAN default
       m_rx1DrOffset(0),
       m_lastTxCh(nullptr)
 {
@@ -68,22 +67,20 @@ ClassAEndDeviceLorawanMac::~ClassAEndDeviceLorawanMac()
 void
 ClassAEndDeviceLorawanMac::SendToPhy(Ptr<Packet> packet)
 {
-    NS_LOG_DEBUG("Packet: " << packet);
+    NS_LOG_FUNCTION(this << packet);
 
     // Configure PHY tx params
     m_txParams.sf = GetSfFromDataRate(m_dataRate);
     m_txParams.bandwidthHz = GetBandwidthFromDataRate(m_dataRate);
     m_txParams.lowDataRateOptimizationEnabled = LoraPhy::GetTSym(m_txParams) > MilliSeconds(16);
-    NS_LOG_DEBUG("DR: " << unsigned(m_dataRate));
-    NS_LOG_DEBUG("SF: " << unsigned(m_txParams.sf));
-    NS_LOG_DEBUG("BW: " << m_txParams.bandwidthHz << " Hz");
+    NS_LOG_DEBUG(m_txParams);
 
     m_lastTxCh = GetChannelForTx();
     double frequency = m_lastTxCh->GetFrequency();
     // Make sure we can transmit at the current power on this channel
     NS_ASSERT_MSG(m_txPower <= m_channelManager->GetTxPowerForChannel(m_lastTxCh),
                   " The selected power is too hight to be supported by this channel.");
-    NS_LOG_DEBUG("Freq: " << frequency << " Hz");
+    NS_LOG_DEBUG("Freq: " << uint32_t(frequency) << " Hz");
 
     // Tag packet with datarate and frequency
     LoraTag tag;
@@ -94,15 +91,13 @@ ClassAEndDeviceLorawanMac::SendToPhy(Ptr<Packet> packet)
 
     // Get the duration
     Time duration = m_phy->GetTimeOnAir(packet, m_txParams);
-    NS_LOG_DEBUG("Duration: " << duration.GetSeconds());
+    NS_LOG_DEBUG("Duration: " << duration.As(Time::MS));
     // Add the event to the channelHelper to keep track of duty cycle
     m_channelManager->AddEvent(duration, m_lastTxCh);
 
     // Send the packet to the PHY layer to send it on the channel
     DynamicCast<EndDeviceLoraPhy>(m_phy)->SwitchToStandby();
     m_phy->Send(packet, m_txParams, frequency, m_txPower);
-    // Fire trace source
-    m_sentNewPacket(packet);
 }
 
 void
@@ -157,8 +152,8 @@ ClassAEndDeviceLorawanMac::Receive(Ptr<const Packet> packet)
     // Open the context to new transmissions
     m_txContext.busy = false;
     // Reset ADR backoff counter and bit
-    m_ADRACKCnt = 0;
-    m_ADRACKReq = false;
+    m_adrAckCnt = 0;
+    m_adrAckReq = false;
     // Clear commands that are re-sent until downlink (DlChannelAns and RxTimingSetupAns)
     m_fOpts.clear();
 
@@ -174,7 +169,7 @@ ClassAEndDeviceLorawanMac::Receive(Ptr<const Packet> packet)
     LoraFrameHeader fHdr;
     fHdr.SetAsDownlink();
     int deserialized = packetCopy->RemoveHeader(fHdr);
-    NS_LOG_DEBUG("Deserialized bytes: " << deserialized << ", Frame Header:\n" << fHdr);
+    NS_LOG_DEBUG("Deserialized bytes: " << deserialized << ", Frame Header: " << fHdr);
     // Parse and apply all MAC commands received
     ApplyMACCommands(fHdr, packetCopy);
 
@@ -215,10 +210,14 @@ ClassAEndDeviceLorawanMac::NoReception()
 void
 ClassAEndDeviceLorawanMac::ManageRetransmissions(RxOutcome outcome)
 {
+    NS_LOG_FUNCTION(this << outcome);
+
     bool recv = (outcome == RECV || outcome == ACK); // We received something
     bool needAck = m_txContext.waitingAck;           // We were waiting for acknowledgement
     bool gotAck = (outcome == ACK);                  // We got acknowledgement
     bool canReTx = (m_txContext.nbTxLeft > 0 && m_nextTx.IsExpired()); // We can retransmit
+    NS_LOG_DEBUG("recv=" << recv << ",needAck=" << needAck << ",gotAck=" << gotAck
+                         << ",canReTx=" << canReTx);
 
     // Condition to schedule retransmission:
     // either we did not receive or we weren't acknowledged + we can retransmit
@@ -248,7 +247,7 @@ ClassAEndDeviceLorawanMac::ManageRetransmissions(RxOutcome outcome)
     {
         m_requiredTxCallback(txs, true, m_txContext.firstAttempt, m_txContext.packet);
         NS_LOG_DEBUG("Received ACK packet after "
-                     << unsigned(txs) << " transmissions: stopping retransmission procedure. ");
+                     << unsigned(txs) << " transmissions: stopping retransmission procedure");
     }
     // Acknowledgement failure of confirmed txs
     // (either exhausted all reTxs or new pkt scheduled while busy)
@@ -265,9 +264,9 @@ ClassAEndDeviceLorawanMac::ManageRetransmissions(RxOutcome outcome)
     // Update uplink frame counter
     m_fCnt++;
     // Update ADRACKCnt only if nothing was received
-    if (!recv && m_ADRACKCnt < MAX_ADR_ACK_CNT) // overflow prevention
+    if (!recv)
     {
-        m_ADRACKCnt++;
+        m_adrAckCnt++;
     }
 }
 
@@ -282,9 +281,9 @@ ClassAEndDeviceLorawanMac::OnRxParamSetupReq(Ptr<RxParamSetupReq> rxParamSetupRe
 
     uint8_t rx1DrOffset = rxParamSetupReq->GetRx1DrOffset();
     uint8_t rx2DataRate = rxParamSetupReq->GetRx2DataRate();
-    double frequency = rxParamSetupReq->GetFrequency();
+    uint32_t frequency = rxParamSetupReq->GetFrequency();
 
-    NS_LOG_INFO(unsigned(rx1DrOffset) << unsigned(rx2DataRate) << frequency);
+    NS_LOG_INFO(unsigned(rx1DrOffset) << " " << unsigned(rx2DataRate) << " " << frequency);
 
     // Check that the desired offset is valid
     bool offsetOk = (0 <= rx1DrOffset && rx1DrOffset <= 5);
@@ -311,11 +310,11 @@ ClassAEndDeviceLorawanMac::OnRxParamSetupReq(Ptr<RxParamSetupReq> rxParamSetupRe
 }
 
 void
-ClassAEndDeviceLorawanMac::OnRxTimingSetupReq(Time delay)
+ClassAEndDeviceLorawanMac::OnRxTimingSetupReq(uint8_t del)
 {
-    NS_LOG_FUNCTION(this << delay);
+    NS_LOG_FUNCTION(this << unsigned(del));
 
-    m_rwm->SetRx1Delay(delay);
+    m_rwm->SetRx1Delay(Seconds((del) ? del : 1));
 
     NS_LOG_INFO("Adding RxTimingSetupAns reply");
     m_fOpts.emplace_back(Create<RxTimingSetupAns>());
@@ -325,17 +324,43 @@ ClassAEndDeviceLorawanMac::OnRxTimingSetupReq(Time delay)
 // Getters and Setters //
 /////////////////////////
 
+Time
+ClassAEndDeviceLorawanMac::GetFirstReceiveWindowDelay()
+{
+    return m_rwm->GetRx1Delay();
+}
+
+uint8_t
+ClassAEndDeviceLorawanMac::GetFirstReceiveWindowDataRate()
+{
+    return m_replyDataRateMatrix.at(m_dataRate).at(m_rx1DrOffset);
+}
+
 void
 ClassAEndDeviceLorawanMac::SetSecondReceiveWindowDataRate(uint8_t dataRate)
 {
+    NS_LOG_FUNCTION(this << unsigned(dataRate));
     m_rwm->SetSf(RecvWindowManager::SECOND, GetSfFromDataRate(dataRate));
     m_rwm->SetDuration(RecvWindowManager::SECOND, GetReceptionWindowDuration(dataRate));
 }
 
-void
-ClassAEndDeviceLorawanMac::SetSecondReceiveWindowFrequency(double frequency)
+uint8_t
+ClassAEndDeviceLorawanMac::GetSecondReceiveWindowDataRate() const
 {
-    m_rwm->SetFrequency(RecvWindowManager::SECOND, frequency);
+    return 12 - m_rwm->GetSf(RecvWindowManager::SECOND);
+}
+
+void
+ClassAEndDeviceLorawanMac::SetSecondReceiveWindowFrequency(uint32_t frequencyHz)
+{
+    NS_LOG_FUNCTION(this << frequencyHz);
+    m_rwm->SetFrequency(RecvWindowManager::SECOND, frequencyHz);
+}
+
+uint32_t
+ClassAEndDeviceLorawanMac::GetSecondReceiveWindowFrequency() const
+{
+    return m_rwm->GetFrequency(RecvWindowManager::SECOND);
 }
 
 void

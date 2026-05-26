@@ -67,7 +67,16 @@ class RecvWindowManager : public Object
     /* Set frequency of window based on id */
     void SetFrequency(WinId id, double f);
 
-    /* Set device physiscal layer */
+    /* Get RX1 delay (RX2 delay will be set to + 1s) */
+    Time GetRx1Delay();
+    /* Get SF of window based on id */
+    uint8_t GetSf(WinId id);
+    /* Get duration of window based on id */
+    Time GetDuration(WinId id);
+    /* Get frequency of window based on id */
+    double GetFrequency(WinId id);
+
+    /* Set device physical layer */
     void SetPhy(Ptr<EndDeviceLoraPhy> phy);
     /* Set callback function to be called on expiration of second reception window */
     void SetNoRecvCallback(NoRecvCallback cb);

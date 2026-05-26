@@ -18,6 +18,8 @@
 #include "ns3/end-device-lora-phy.h"
 #include "ns3/simulator.h"
 
+#include <bitset>
+
 namespace ns3
 {
 namespace lorawan
@@ -39,22 +41,20 @@ BaseEndDeviceLorawanMac::GetTypeId()
                           UintegerValue(0),
                           MakeUintegerAccessor(&BaseEndDeviceLorawanMac::m_dataRate),
                           MakeUintegerChecker<uint8_t>(0, 5))
-            .AddAttribute("ADRBit",
-                          "Whether to request the NS to control this device's Data Rate",
-                          BooleanValue(),
-                          MakeBooleanAccessor(&BaseEndDeviceLorawanMac::m_ADRBit),
-                          MakeBooleanChecker())
+            .AddAttribute(
+                "ADR",
+                "Ensure to the network server that this device will accept data rate, transmission "
+                "power and number of retransmissions configurations received via LinkADRReq. This "
+                "also allows the device's local ADR backoff procedure to reset configurations in "
+                "case of connectivity loss.",
+                BooleanValue(true),
+                MakeBooleanAccessor(&BaseEndDeviceLorawanMac::m_adr),
+                MakeBooleanChecker())
             .AddAttribute("NbTrans",
                           "Default number of transmissions for each packet",
                           IntegerValue(1),
                           MakeIntegerAccessor(&BaseEndDeviceLorawanMac::m_nbTrans),
                           MakeIntegerChecker<uint8_t>())
-            .AddAttribute("ADRBackoff",
-                          "Whether the End Device should up its Data Rate "
-                          "in case it doesn't get a reply from the NS.",
-                          BooleanValue(false),
-                          MakeBooleanAccessor(&BaseEndDeviceLorawanMac::m_enableADRBackoff),
-                          MakeBooleanChecker())
             .AddAttribute(
                 "FType",
                 "Specify type of message will be sent by this ED.",
@@ -90,13 +90,13 @@ BaseEndDeviceLorawanMac::GetTypeId()
                 "communications between this end device "
                 "and a gateway",
                 MakeTraceSourceAccessor(&BaseEndDeviceLorawanMac::m_lastKnownLinkMargin),
-                "ns3::TracedValueCallback::Double")
+                "ns3::TracedValueCallback::uint8_t")
             .AddTraceSource(
                 "LastKnownGatewayCount",
                 "Last known number of gateways able to "
                 "listen to this end device",
                 MakeTraceSourceAccessor(&BaseEndDeviceLorawanMac::m_lastKnownGatewayCount),
-                "ns3::TracedValueCallback::Int")
+                "ns3::TracedValueCallback::uint8_t")
             .AddTraceSource(
                 "AggregatedDutyCycle",
                 "Aggregate duty cycle, in fraction form, "
@@ -107,21 +107,15 @@ BaseEndDeviceLorawanMac::GetTypeId()
 }
 
 BaseEndDeviceLorawanMac::BaseEndDeviceLorawanMac()
-    // Protected MAC layer settings
-    : m_dataRate(0),
+    : // Protected MAC layer settings
       m_txPower(14),
-      m_nbTrans(1),
       // Protected MAC layer context
       m_fCnt(0),
-      m_ADRACKCnt(0),
-      m_ADRACKReq(false),
+      m_adrAckCnt(0),
+      m_adrAckReq(false),
       // Private Header fields
-      m_fType(LorawanMacHeader::UNCONFIRMED_DATA_UP),
       m_address(LoraDeviceAddress(0)),
-      m_ADRBit(false),
       // Private MAC layer settings
-      m_enableADRBackoff(false),
-      m_enableCrypto(false),
       m_aggregatedDutyCycle(1),
       // Private MAC layer context
       m_lastKnownLinkMargin(0),
@@ -208,23 +202,18 @@ BaseEndDeviceLorawanMac::DoSend(Ptr<Packet> packet)
         // If re-transmissions of last packet were interrupted, update frame counters
         if (m_txContext.nbTxLeft)
         {
+            NS_LOG_DEBUG("New packet from the APP layer: stopping retransmission process");
             // Trace if previous confirmed packet was not acknowledged
             if (m_txContext.waitingAck)
             {
                 uint8_t txs = m_nbTrans - m_txContext.nbTxLeft;
                 m_requiredTxCallback(txs, false, m_txContext.firstAttempt, m_txContext.packet);
-                NS_LOG_DEBUG(
-                    " Received new packet from the application layer: stopping retransmission "
-                    "procedure. Previous packet not acknowledged. Used "
-                    << unsigned(txs) << " transmissions out of a maximum of " << unsigned(m_nbTrans)
-                    << ".");
+                NS_LOG_DEBUG("Previous packet not acknowledged, used "
+                             << unsigned(txs) << " transmissions out of " << unsigned(m_nbTrans));
             }
             // Update frame counter and ADRACKCnt (normally updated after exhausting all reTxs)
             m_fCnt++;
-            if (m_ADRACKCnt < MAX_ADR_ACK_CNT) // overflow prevention
-            {
-                m_ADRACKCnt++;
-            }
+            m_adrAckCnt++;
         }
         // Reset reTx context
         m_txContext = {.firstAttempt = Simulator::Now(),
@@ -232,7 +221,6 @@ BaseEndDeviceLorawanMac::DoSend(Ptr<Packet> packet)
                        .nbTxLeft = m_nbTrans,
                        .waitingAck = (m_fType == LorawanMacHeader::CONFIRMED_DATA_UP),
                        .busy = false};
-        NS_LOG_DEBUG("New APP packet: " << packet << ".");
     }
     else // Retransmission
     {
@@ -246,11 +234,16 @@ BaseEndDeviceLorawanMac::DoSend(Ptr<Packet> packet)
         NS_LOG_DEBUG("Retransmitting an old packet.");
     }
 
-    if (m_enableADRBackoff)
+    // Evaluate ADR backoff as in LoRaWAN specification, V1.0.4 (2020)
+    // Adapted from: github.com/Lora-net/SWL2001.git v4.8.0
+    m_adrAckReq = (m_adrAckCnt >= ADR_ACK_LIMIT); // Set the ADRACKReq bit in frame header
+    if (m_adrAckCnt >= ADR_ACK_LIMIT + ADR_ACK_DELAY)
     {
-        // ADR backoff as in LoRaWAN specification, V1.0.4 (2020)
+        // Unreachable by retx: they do not increase ADRACKCnt
         ExecuteADRBackoff();
+        m_adrAckCnt = ADR_ACK_LIMIT;
     }
+    NS_ASSERT(m_adrAckCnt < 2400);
 
     // Add the Lora Frame Header to the packet
     LoraFrameHeader fHdr;
@@ -295,30 +288,31 @@ BaseEndDeviceLorawanMac::ExecuteADRBackoff()
 {
     NS_LOG_FUNCTION(this);
 
-    // ADR backoff as in LoRaWAN specification, V1.0.4 (2020)
-    if (m_ADRACKCnt == ADR_ACK_LIMIT)
+    // Adapted from: github.com/Lora-net/SWL2001.git v4.8.0
+    // For the time being, this implementation is valid for the EU868 region
+
+    if (!m_adr)
     {
-        m_ADRACKReq = true; // Set the ADRACKReq bit in frame header
+        return;
     }
-    else if (m_ADRACKCnt == ADR_ACK_LIMIT + ADR_ACK_DELAY)
+
+    if (m_txPower < 14)
     {
         m_txPower = 14; // Reset transmission power to default
+        return;
     }
-    else if (m_ADRACKCnt > ADR_ACK_LIMIT && !((m_ADRACKCnt - ADR_ACK_LIMIT) % ADR_ACK_DELAY))
+
+    if (m_dataRate != 0)
     {
-        if (m_dataRate)
-        {
-            m_dataRate--; // Decrease data rate
-        }
-        else
-        {
-            // Enable default channels and set nbTrans to 1
-            m_channelManager->GetChannel(0)->EnableForUplink();
-            m_channelManager->GetChannel(1)->EnableForUplink();
-            m_channelManager->GetChannel(2)->EnableForUplink();
-            m_nbTrans = 1;
-        }
+        m_dataRate--;
+        return;
     }
+
+    // Set nbTrans to 1 and re-enable default channels
+    m_nbTrans = 1;
+    m_channelManager->GetChannel(0)->EnableForUplink();
+    m_channelManager->GetChannel(1)->EnableForUplink();
+    m_channelManager->GetChannel(2)->EnableForUplink();
 }
 
 Ptr<LogicalChannel>
@@ -381,13 +375,13 @@ BaseEndDeviceLorawanMac::AddMacCommand(Ptr<MacCommand> macCommand)
 void
 BaseEndDeviceLorawanMac::FillHeader(LoraFrameHeader& fHdr)
 {
-    NS_LOG_FUNCTION(this << fHdr);
+    NS_LOG_FUNCTION(this);
 
     fHdr.SetAsUplink();
     fHdr.SetFPort(1); // TODO Use an appropriate frame port based on the application
     fHdr.SetAddress(m_address);
-    fHdr.SetAdr(m_ADRBit);
-    fHdr.SetAdrAckReq(m_ADRACKReq);
+    fHdr.SetAdr(m_adr);
+    fHdr.SetAdrAckReq(m_adrAckReq);
 
     // FPending does not exist in uplink messages
     fHdr.SetFCnt(m_fCnt);
@@ -412,15 +406,19 @@ BaseEndDeviceLorawanMac::FillHeader(LoraFrameHeader& fHdr)
     // Reset MAC command list
     // (but leave DlChannelAns and RxTimingSetupAns)
     m_fOpts = tmpCmdList;
+
+    NS_LOG_DEBUG(fHdr);
 }
 
 void
 BaseEndDeviceLorawanMac::FillHeader(LorawanMacHeader& mHdr)
 {
-    NS_LOG_FUNCTION(this << mHdr);
+    NS_LOG_FUNCTION(this);
 
     mHdr.SetFType(m_fType);
     mHdr.SetMajor(0);
+
+    NS_LOG_DEBUG(mHdr);
 }
 
 void
@@ -476,13 +474,12 @@ BaseEndDeviceLorawanMac::ApplyMACCommands(LoraFrameHeader fHdr, Ptr<const Packet
         }
         case (LINK_ADR_REQ): {
             NS_LOG_DEBUG("Detected a LinkAdrReq command.");
-            // Cast the command
             auto linkAdrReq = DynamicCast<LinkAdrReq>(cmd);
-            // Call the appropriate function to take action
             OnLinkAdrReq(linkAdrReq->GetDataRate(),
                          linkAdrReq->GetTxPower(),
-                         linkAdrReq->GetEnabledChannelsList(),
-                         linkAdrReq->GetRepetitions());
+                         linkAdrReq->GetChMask(),
+                         linkAdrReq->GetChMaskCntl(),
+                         linkAdrReq->GetNbTrans());
             break;
         }
         case (DUTY_CYCLE_REQ): {
@@ -490,7 +487,7 @@ BaseEndDeviceLorawanMac::ApplyMACCommands(LoraFrameHeader fHdr, Ptr<const Packet
             // Cast the command
             auto dutyCycleReq = DynamicCast<DutyCycleReq>(cmd);
             // Call the appropriate function to take action
-            OnDutyCycleReq(dutyCycleReq->GetMaximumAllowedDutyCycle());
+            OnDutyCycleReq(dutyCycleReq->GetMaxDutyCycle());
             break;
         }
         case (RX_PARAM_SETUP_REQ): {
@@ -525,7 +522,7 @@ BaseEndDeviceLorawanMac::ApplyMACCommands(LoraFrameHeader fHdr, Ptr<const Packet
             // Cast the command
             auto rxTimingSetupReq = DynamicCast<RxTimingSetupReq>(cmd);
             // Call the appropriate function to take action
-            OnRxTimingSetupReq(rxTimingSetupReq->GetDelay());
+            OnRxTimingSetupReq(rxTimingSetupReq->GetDel());
             break;
         }
         case (TX_PARAM_SETUP_REQ): {
@@ -608,120 +605,192 @@ BaseEndDeviceLorawanMac::OnLinkCheckAns(uint8_t margin, uint8_t gwCnt)
 void
 BaseEndDeviceLorawanMac::OnLinkAdrReq(uint8_t dataRate,
                                       uint8_t txPower,
-                                      std::list<int> enabledChannels,
-                                      int repetitions)
+                                      uint16_t chMask,
+                                      uint8_t chMaskCntl,
+                                      uint8_t nbTrans)
 {
-    NS_LOG_FUNCTION(this << unsigned(dataRate) << unsigned(txPower) << repetitions);
+    NS_LOG_FUNCTION(this << unsigned(dataRate) << unsigned(txPower) << std::bitset<16>(chMask)
+                         << unsigned(chMaskCntl) << unsigned(nbTrans));
 
-    // Three bools for three requirements before setting things up
-    bool channelMaskOk = !enabledChannels.empty();
-    bool dataRateOk = true;
-    bool txPowerOk = true;
+    // Adapted from: github.com/Lora-net/SWL2001.git v4.3.1
+    // For the time being, this implementation is valid for the EU868 region
+    const uint8_t NUM_CHAN = 16;
 
-    // Check the channel mask
-    /////////////////////////
-    // Check whether all specified channels exist on this device
-    for (auto& chIndex : enabledChannels)
+    NS_ASSERT_MSG(!(dataRate & 0xF0), "dataRate field > 4 bits");
+    NS_ASSERT_MSG(!(txPower & 0xF0), "txPower field > 4 bits");
+    NS_ASSERT_MSG(!(chMaskCntl & 0xF8), "chMaskCntl field > 3 bits");
+    NS_ASSERT_MSG(!(nbTrans & 0xF0), "nbTrans field > 4 bits");
+
+    bool channelMaskAck = true;
+    bool dataRateAck = true;
+    bool powerAck = true;
+
+    NS_LOG_DEBUG("Channel mask = " << std::bitset<16>(chMask)
+                                   << ", ChMaskCtrl = " << unsigned(chMaskCntl));
+
+    // Check channel mask
+    switch (chMaskCntl)
     {
-        if (!m_channelManager->GetChannel(chIndex))
+    // Channels 0 to 15
+    case 0:
+        // Check if all enabled channels have a valid frequency
+        for (size_t i = 0; i < NUM_CHAN; ++i)
         {
-            channelMaskOk = false;
-            break;
+            if ((chMask & 0b1 << i) && !m_channelManager->GetChannel(i))
+            {
+                NS_LOG_WARN("Invalid channel mask");
+                channelMaskAck = false;
+                break; // break for loop
+            }
+        }
+        break;
+    // All channels ON independently of the ChMask field value
+    case 6:
+        chMask = 0b0;
+        for (size_t i = 0; i < NUM_CHAN; ++i)
+        {
+            if (m_channelManager->GetChannel(i))
+            {
+                chMask |= 0b1 << i;
+            }
+        }
+        break;
+    default:
+        NS_LOG_WARN("Invalid channel mask ctrl field");
+        channelMaskAck = false;
+        break;
+    }
+
+    // check if all channels are disabled
+    if (chMask == 0)
+    {
+        NS_LOG_WARN("Invalid channel mask");
+        channelMaskAck = false;
+    }
+
+    // Temporary channel mask is built and validated
+    if (!m_adr) // ADR disabled, only consider channel mask conf.
+    {
+        /// @remark Original code considers this to be mobile-mode
+        if (channelMaskAck) // valid channel mask
+        {
+            bool compatible = false;
+            // Look for enabled channel that supports current data rate.
+            for (size_t i = 0; i < NUM_CHAN; ++i)
+            {
+                if ((chMask & 0b1 << i) &&
+                    m_dataRate >= m_channelManager->GetChannel(i)->GetMinimumDataRate() &&
+                    m_dataRate <= m_channelManager->GetChannel(i)->GetMaximumDataRate())
+                { // Found compatible channel, break loop
+                    compatible = true;
+                    break;
+                }
+            }
+            if (!compatible)
+            {
+                NS_LOG_WARN("Invalid channel mask for current device data rate (ADR off)");
+                channelMaskAck = dataRateAck = powerAck = false; // reject all configurations
+            }
+            else // apply channel mask configuration
+            {
+                for (size_t i = 0; i < NUM_CHAN; ++i)
+                {
+                    if (auto c = m_channelManager->GetChannel(i); c)
+                    {
+                        (chMask & 0b1 << i) ? c->EnableForUplink() : c->DisableForUplink();
+                    }
+                }
+                dataRateAck = powerAck = false; // only ack channel mask
+            }
+        }
+        else // reject
+        {
+            NS_LOG_WARN("Invalid channel mask");
+            dataRateAck = powerAck = false; // reject all configurations
         }
     }
-
-    // Check the dataRate
-    /////////////////////
-    // We need to know we can use it at all
-    // To assess this, we try and convert it to a SF/BW combination and check if
-    // those values are valid. Since GetSfFromDataRate and
-    // GetBandwidthFromDataRate return 0 if the dataRate is not recognized, we
-    // can check against this.
-    uint8_t sf = GetSfFromDataRate(dataRate);
-    double bw = GetBandwidthFromDataRate(dataRate);
-    NS_LOG_DEBUG("SF: " << unsigned(sf) << ", BW: " << bw);
-    if (sf == 0 || bw == 0)
+    else // Server-side ADR is enabled
     {
-        dataRateOk = false;
-        NS_LOG_DEBUG("Data rate non valid");
-    }
-
-    // We need to know we can use it in at least one of the enabled channels
-    // Cycle through available channels, stop when at least one is enabled for the
-    // specified dataRate.
-    if (dataRateOk && channelMaskOk) // If false, skip the check
-    {
-        bool foundAvailableChannel = false;
-        for (auto& chIndex : enabledChannels)
+        if (dataRate != 0xF) // If value is 0xF, ignore config.
         {
-            auto ch = m_channelManager->GetChannel(chIndex);
-            NS_LOG_DEBUG("MinDR: " << unsigned(ch->GetMinimumDataRate()));
-            NS_LOG_DEBUG("MaxDR: " << unsigned(ch->GetMaximumDataRate()));
-            if (ch->GetMinimumDataRate() <= dataRate && ch->GetMaximumDataRate() >= dataRate)
+            bool compatible = false;
+            // Look for enabled channel that supports config. data rate.
+            for (size_t i = 0; i < NUM_CHAN; ++i)
             {
-                foundAvailableChannel = true;
-                break;
+                if (chMask & 0b1 << i) // all enabled by chMask, even if it was invalid
+                {
+                    if (const auto& c = m_channelManager->GetChannel(i); c) // exists
+                    {
+                        if (dataRate >= c->GetMinimumDataRate() &&
+                            dataRate <= c->GetMaximumDataRate())
+                        { // Found compatible channel, break loop
+                            compatible = true;
+                            break;
+                        }
+                    }
+                    else // manages invalid case, checks with defaults
+                    {
+                        if (GetSfFromDataRate(dataRate) && GetBandwidthFromDataRate(dataRate))
+                        { // Found compatible (invalid) channel, break loop
+                            compatible = true;
+                            break;
+                        }
+                    }
+                }
+            }
+            // Check if it is acceptable
+            if (!compatible)
+            {
+                NS_LOG_WARN("Invalid data rate");
+                dataRateAck = false;
             }
         }
 
-        if (!foundAvailableChannel)
+        if (txPower != 0xF) // If value is 0xF, ignore config.
         {
-            dataRateOk = false;
-            NS_LOG_DEBUG("Available channel not found");
-        }
-    }
-
-    // Check the txPower
-    ////////////////////
-    // Check whether we can use this transmission power
-    if (GetDbmForTxPower(txPower) == -1)
-    {
-        txPowerOk = false;
-    }
-
-    NS_LOG_DEBUG("Finished checking. " << "ChannelMaskOk: " << channelMaskOk << ", "
-                                       << "DataRateOk: " << dataRateOk << ", "
-                                       << "txPowerOk: " << txPowerOk);
-
-    // If all checks are successful, set parameters up
-    //////////////////////////////////////////////////
-    if (channelMaskOk && dataRateOk && txPowerOk)
-    {
-        // Cycle over all channels in the list
-        for (uint32_t i = 0; i < m_channelManager->GetChannelList().size(); i++)
-        {
-            if (std::find(enabledChannels.begin(), enabledChannels.end(), i) !=
-                enabledChannels.end())
+            // Check if it is acceptable
+            if (GetDbmForTxPower(txPower) < 0)
             {
-                m_channelManager->GetChannelList().at(i)->EnableForUplink();
-                NS_LOG_DEBUG("Channel " << i << " enabled");
-            }
-            else
-            {
-                m_channelManager->GetChannelList().at(i)->DisableForUplink();
-                NS_LOG_DEBUG("Channel " << i << " disabled");
+                NS_LOG_WARN("Invalid tx power");
+                powerAck = false;
             }
         }
 
-        // Set the data rate
-        m_dataRate = dataRate;
-
-        // Set the transmission power
-        m_txPower = GetDbmForTxPower(txPower);
-
-        // Set the number of redundant transmissions
-        m_nbTrans = repetitions;
+        // If no error, apply configurations
+        if (channelMaskAck && dataRateAck && powerAck)
+        {
+            for (size_t i = 0; i < NUM_CHAN; ++i)
+            {
+                if (auto c = m_channelManager->GetChannel(i); c)
+                {
+                    (chMask & 0b1 << i) ? c->EnableForUplink() : c->DisableForUplink();
+                }
+            }
+            if (txPower != 0xF) // If value is 0xF, ignore config.
+            {
+                m_txPower = GetDbmForTxPower(txPower);
+            }
+            m_nbTrans = (nbTrans == 0) ? 1 : nbTrans;
+            if (dataRate != 0xF) // If value is 0xF, ignore config.
+            {
+                m_dataRate = dataRate;
+            }
+            NS_LOG_DEBUG("MacTxDataRateAdr = " << unsigned(m_dataRate));
+            NS_LOG_DEBUG("MacTxPower = " << unsigned(m_txPower) << "dBm");
+            NS_LOG_DEBUG("MacNbTrans = " << unsigned(m_nbTrans));
+        }
     }
 
-    // Craft a LinkAdrAns MAC command as a response
-    ///////////////////////////////////////////////
-    m_fOpts.emplace_back(Create<LinkAdrAns>(txPowerOk, dataRateOk, channelMaskOk));
+    NS_LOG_INFO("Adding LinkAdrAns reply");
+    m_fOpts.emplace_back(Create<LinkAdrAns>(powerAck, dataRateAck, channelMaskAck));
 }
 
 void
-BaseEndDeviceLorawanMac::OnDutyCycleReq(double dutyCycle)
+BaseEndDeviceLorawanMac::OnDutyCycleReq(uint8_t maxDutyCycle)
 {
-    NS_LOG_FUNCTION(this << dutyCycle);
+    NS_LOG_FUNCTION(this << unsigned(maxDutyCycle));
+
+    auto dutyCycle = (maxDutyCycle) ? 1 / std::pow(2, double(maxDutyCycle)) : 1;
 
     // Make sure we get a value that makes sense
     NS_ASSERT(0 <= dutyCycle && dutyCycle <= 1);
@@ -739,8 +808,8 @@ BaseEndDeviceLorawanMac::OnDevStatusReq()
 {
     NS_LOG_FUNCTION(this);
 
-    uint8_t battery = 10; // XXX Fake battery level
-    uint8_t margin = 10;  // XXX Fake margin
+    uint8_t battery = 0; // XXX Fake battery level
+    uint8_t margin = 31; // XXX Fake margin
 
     // Craft a RxParamSetupAns as response
     NS_LOG_INFO("Adding DevStatusAns reply");
@@ -867,16 +936,22 @@ BaseEndDeviceLorawanMac::GetNumberOfTransmissions() const
     return m_nbTrans;
 }
 
-void
-BaseEndDeviceLorawanMac::SetADRBackoff(bool backoff)
+uint16_t
+BaseEndDeviceLorawanMac::GetFCnt() const
 {
-    m_enableADRBackoff = backoff;
+    return m_fCnt;
 }
 
-bool
-BaseEndDeviceLorawanMac::GetADRBackoff() const
+uint8_t
+BaseEndDeviceLorawanMac::GetLastKnownLinkMarginDb() const
 {
-    return m_enableADRBackoff;
+    return m_lastKnownLinkMargin;
+}
+
+uint8_t
+BaseEndDeviceLorawanMac::GetLastKnownGatewayCount() const
+{
+    return m_lastKnownGatewayCount;
 }
 
 void

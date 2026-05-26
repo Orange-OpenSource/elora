@@ -98,8 +98,10 @@ LorawanMacHeader::Deserialize(Buffer::Iterator start)
 void
 LorawanMacHeader::Print(std::ostream& os) const
 {
-    os << "MessageType=" << unsigned(m_ftype) << std::endl;
-    os << "Major=" << unsigned(m_major) << std::endl;
+    os << "MHDR(";
+    os << "MessageType=" << unsigned(m_ftype);
+    os << ", Major=" << unsigned(m_major);
+    os << ")";
 }
 
 void

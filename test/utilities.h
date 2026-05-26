@@ -5,26 +5,31 @@
  *
  * Authors: Davide Magrin <magrinda@dei.unipd.it>
  */
+
 #ifndef TEST_UTILITIES_H
 #define TEST_UTILITIES_H
 
-#include "ns3/forwarder-helper.h"
-#include "ns3/lorawan-helper.h"
+#include "ns3/lora-channel.h"
+#include "ns3/lora-net-device.h"
 #include "ns3/mobility-helper.h"
-#include "ns3/network-server-helper.h"
-#include "ns3/position-allocator.h"
+#include "ns3/node-container.h"
 
 namespace ns3
 {
 namespace lorawan
 {
 
+/**
+ * @ingroup lorawan
+ *
+ * Stores the main elements of a simulated LoRaWAN network
+ */
 struct NetworkComponents
 {
-    Ptr<LoraChannel> channel;
-    NodeContainer endDevices;
-    NodeContainer gateways;
-    Ptr<Node> nsNode;
+    Ptr<LoraChannel> channel; //!< A pointer to the LoraChannel object.
+    NodeContainer endDevices; //!< Container of the end device nodes.
+    NodeContainer gateways;   //!< Container of the gateway nodes.
+    Ptr<Node> nsNode;         //!< A pointer to the network server Node.
 };
 
 Ptr<LoraChannel> CreateChannel();
@@ -43,7 +48,8 @@ GetMacLayerFromNode(Ptr<Node> n)
 }
 
 NetworkComponents InitializeNetwork(int nDevices, int nGateways);
-} // namespace lorawan
 
+} // namespace lorawan
 } // namespace ns3
-#endif
+
+#endif /* TEST_UTILITIES_H */

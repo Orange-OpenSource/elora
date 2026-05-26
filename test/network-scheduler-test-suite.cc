@@ -1,4 +1,8 @@
 /*
+ * Copyright (c) 2018 University of Padova
+ *
+ * SPDX-License-Identifier: GPL-2.0-only
+ *
  * Author: Davide Magrin <magrinda@dei.unipd.it>
  *
  * 17/01/2023
@@ -6,27 +10,27 @@
  *                              <alessandro.aimi@cnam.fr>
  */
 
-// Include headers of classes to test
-#include "ns3/log.h"
-#include "ns3/network-scheduler.h"
-
 // An essential include is test.h
 #include "ns3/test.h"
+
+// Include headers of classes to test
+#include "ns3/network-scheduler.h"
 
 using namespace ns3;
 using namespace lorawan;
 
 NS_LOG_COMPONENT_DEFINE("NetworkSchedulerTestSuite");
 
-/////////////////////////////
-// NetworkStatus testing //
-/////////////////////////////
-
+/**
+ * @ingroup lorawan
+ *
+ * It tests the correct functionality of the NetworkScheduler component class of the network server
+ */
 class NetworkSchedulerTest : public TestCase
 {
   public:
-    NetworkSchedulerTest();
-    ~NetworkSchedulerTest() override;
+    NetworkSchedulerTest();           //!< Default constructor
+    ~NetworkSchedulerTest() override; //!< Destructor
 
   private:
     void DoRun() override;
@@ -54,25 +58,23 @@ NetworkSchedulerTest::DoRun()
     // scheduled to happen 1 second after the reception.
 }
 
-/**************
- * Test Suite *
- **************/
-
-// The TestSuite class names the TestSuite, identifies what type of TestSuite,
-// and enables the TestCases to be run. Typically, only the constructor for
-// this class must be defined
-
+/**
+ * @ingroup lorawan
+ *
+ * The TestSuite class names the TestSuite, identifies what type of TestSuite, and enables the
+ * TestCases to be run. Typically, only the constructor for this class must be defined
+ */
 class NetworkSchedulerTestSuite : public TestSuite
 {
   public:
-    NetworkSchedulerTestSuite();
+    NetworkSchedulerTestSuite(); //!< Default constructor
 };
 
 NetworkSchedulerTestSuite::NetworkSchedulerTestSuite()
     : TestSuite("network-scheduler", Type::UNIT)
 {
-    LogComponentEnable("NetworkSchedulerTestSuite", LOG_LEVEL_DEBUG);
-    // TestDuration for TestCase can be QUICK, EXTENSIVE or TAKES_FOREVER
+    // LogComponentEnable("NetworkSchedulerTestSuite", LOG_LEVEL_DEBUG);
+
     AddTestCase(new NetworkSchedulerTest, Duration::QUICK);
 }
 

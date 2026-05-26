@@ -1,4 +1,19 @@
+/*
+ * Copyright (c) 2018 University of Padova
+ *
+ * SPDX-License-Identifier: GPL-2.0-only
+ *
+ * Authors: Davide Magrin <magrinda@dei.unipd.it>
+ */
+
 #include "utilities.h"
+
+#include "ns3/forwarder-helper.h"
+#include "ns3/lorawan-helper.h"
+#include "ns3/mobility-model.h"
+#include "ns3/network-server-helper.h"
+#include "ns3/point-to-point-helper.h"
+#include "ns3/string.h"
 
 namespace ns3
 {
@@ -76,7 +91,7 @@ CreateGateways(int nGateways, MobilityHelper mobility, Ptr<LoraChannel> channel)
 Ptr<Node>
 CreateNetworkServer(NodeContainer endDevices, NodeContainer gateways)
 {
-    // Create the NetworkServer node
+    // Create the network server node
     Ptr<Node> nsNode = CreateObject<Node>();
 
     // PointToPoint links between gateways and server

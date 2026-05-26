@@ -108,6 +108,30 @@ RecvWindowManager::SetFrequency(WinId id, double f)
     m_win[id].frequency = f;
 }
 
+Time
+RecvWindowManager::GetRx1Delay()
+{
+    return m_win[FIRST].delay;
+}
+
+uint8_t
+RecvWindowManager::GetSf(WinId id)
+{
+    return m_win[id].sf;
+}
+
+Time
+RecvWindowManager::GetDuration(WinId id)
+{
+    return m_win[id].duration;
+}
+
+double
+RecvWindowManager::GetFrequency(WinId id)
+{
+    return m_win[id].frequency;
+}
+
 void
 RecvWindowManager::SetPhy(Ptr<EndDeviceLoraPhy> phy)
 {
@@ -134,15 +158,26 @@ void
 RecvWindowManager::OpenWin(WinId id)
 {
     NS_LOG_FUNCTION(this << id);
-    // Set reception window parameters
-    m_phy->SetRxSpreadingFactor(m_win[id].sf);
-    m_phy->SetRxFrequency(m_win[id].frequency);
-    NS_LOG_DEBUG("Opening reception window with parameters: freq="
-                 << m_win[id].frequency << "Hz, SF=" << unsigned(m_win[id].sf) << ".");
-    // Set Phy in Standby mode
-    m_phy->SwitchToStandby();
-    // Schedule closure
-    m_closing = Simulator::Schedule(m_win[id].duration, &RecvWindowManager::CloseWin, this, id);
+    switch (m_phy->GetState())
+    {
+    case EndDeviceLoraPhy::TX:
+        NS_ABORT_MSG("PHY was in TX mode when attempting to open a receive window.");
+    case EndDeviceLoraPhy::RX:
+        // PHY is receiving: let it finish
+        NS_LOG_DEBUG("PHY is receiving: Receive will handle the result.");
+        return;
+    case EndDeviceLoraPhy::SLEEP:
+    case EndDeviceLoraPhy::STANDBY:
+        // Set reception window parameters
+        m_phy->SetRxSpreadingFactor(m_win[id].sf);
+        m_phy->SetRxFrequency(m_win[id].frequency);
+        NS_LOG_DEBUG("Opening reception window with parameters: freq="
+                     << m_win[id].frequency << "Hz, SF=" << unsigned(m_win[id].sf) << ".");
+        // Set Phy in Standby mode
+        m_phy->SwitchToStandby();
+        // Schedule closure
+        m_closing = Simulator::Schedule(m_win[id].duration, &RecvWindowManager::CloseWin, this, id);
+    }
 }
 
 void
@@ -156,8 +191,7 @@ RecvWindowManager::CloseWin(WinId id)
     switch (m_phy->GetState())
     {
     case EndDeviceLoraPhy::TX:
-        NS_ABORT_MSG("PHY was in TX mode when attempting to "
-                     << "close a receive window.");
+        NS_ABORT_MSG("PHY was in TX mode when attempting to close a receive window.");
     case EndDeviceLoraPhy::SLEEP:
         NS_ABORT_MSG("PHY was in already in SLEEP mode when attempting to "
                      << "close a receive window.");

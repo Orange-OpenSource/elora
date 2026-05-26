@@ -132,7 +132,7 @@ LorawanMac::GetSfFromDataRate(uint8_t dataRate)
     NS_LOG_FUNCTION(this << unsigned(dataRate));
 
     // Check we are in range
-    if (dataRate >= m_sfForDataRate.size())
+    if (dataRate > m_sfForDataRate.size() - 1)
     {
         return 0;
     }
@@ -146,7 +146,7 @@ LorawanMac::GetBandwidthFromDataRate(uint8_t dataRate)
     NS_LOG_FUNCTION(this << unsigned(dataRate));
 
     // Check we are in range
-    if (dataRate > m_bandwidthForDataRate.size())
+    if (dataRate > m_bandwidthForDataRate.size() - 1)
     {
         return 0;
     }
@@ -159,7 +159,7 @@ LorawanMac::GetDbmForTxPower(uint8_t txPower)
 {
     NS_LOG_FUNCTION(this << unsigned(txPower));
 
-    if (txPower > m_txDbmForTxPower.size())
+    if (txPower > m_txDbmForTxPower.size() - 1)
     {
         return -1;
     }

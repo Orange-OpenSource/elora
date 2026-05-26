@@ -1,8 +1,7 @@
 /*
- * This file includes testing for the following components:
- * - EndDeviceStatus
- * - GatewayStatus
- * - NetworkStatus
+ * Copyright (c) 2018 University of Padova
+ *
+ * SPDX-License-Identifier: GPL-2.0-only
  *
  * Author: Davide Magrin <magrinda@dei.unipd.it>
  *
@@ -11,30 +10,37 @@
  *                              <alessandro.aimi@cnam.fr>
  */
 
-// Include headers of classes to test
-#include "utilities.h"
+/*
+ * This file includes testing for the following components:
+ * - EndDeviceStatus
+ * - GatewayStatus
+ * - NetworkStatus
+ */
 
-#include "ns3/end-device-status.h"
-#include "ns3/log.h"
-#include "ns3/network-status.h"
+#include "utilities.h"
 
 // An essential include is test.h
 #include "ns3/test.h"
+
+// Include headers of classes to test
+#include "ns3/class-a-end-device-lorawan-mac.h"
+#include "ns3/network-status.h"
 
 using namespace ns3;
 using namespace lorawan;
 
 NS_LOG_COMPONENT_DEFINE("NetworkStatusTestSuite");
 
-/////////////////////////////
-// EndDeviceStatus testing //
-/////////////////////////////
-
+/**
+ * @ingroup lorawan
+ *
+ * It tests the constructor of the EndDeviceStatus class
+ */
 class EndDeviceStatusTest : public TestCase
 {
   public:
-    EndDeviceStatusTest();
-    ~EndDeviceStatusTest() override;
+    EndDeviceStatusTest();           //!< Default constructor
+    ~EndDeviceStatusTest() override; //!< Destructor
 
   private:
     void DoRun() override;
@@ -62,15 +68,16 @@ EndDeviceStatusTest::DoRun()
     EndDeviceStatus eds = EndDeviceStatus();
 }
 
-/////////////////////////////
-// NetworkStatus testing //
-/////////////////////////////
-
+/**
+ * @ingroup lorawan
+ *
+ * It tests the function NetworkStatus::AddNode
+ */
 class NetworkStatusTest : public TestCase
 {
   public:
-    NetworkStatusTest();
-    ~NetworkStatusTest() override;
+    NetworkStatusTest();           //!< Default constructor
+    ~NetworkStatusTest() override; //!< Destructor
 
   private:
     void DoRun() override;
@@ -107,25 +114,23 @@ NetworkStatusTest::DoRun()
     ns.AddNode(GetMacLayerFromNode<ClassAEndDeviceLorawanMac>(endDevices.Get(0)));
 }
 
-/**************
- * Test Suite *
- **************/
-
-// The TestSuite class names the TestSuite, identifies what type of TestSuite,
-// and enables the TestCases to be run. Typically, only the constructor for
-// this class must be defined
-
+/**
+ * @ingroup lorawan
+ *
+ * The TestSuite class names the TestSuite, identifies what type of TestSuite, and enables the
+ * TestCases to be run. Typically, only the constructor for this class must be defined
+ */
 class NetworkStatusTestSuite : public TestSuite
 {
   public:
-    NetworkStatusTestSuite();
+    NetworkStatusTestSuite(); //!< Default constructor
 };
 
 NetworkStatusTestSuite::NetworkStatusTestSuite()
     : TestSuite("network-status", Type::UNIT)
 {
-    LogComponentEnable("NetworkStatusTestSuite", LOG_LEVEL_DEBUG);
-    // TestDuration for TestCase can be QUICK, EXTENSIVE or TAKES_FOREVER
+    // LogComponentEnable("NetworkStatusTestSuite", LOG_LEVEL_DEBUG);
+
     AddTestCase(new EndDeviceStatusTest, Duration::QUICK);
     AddTestCase(new NetworkStatusTest, Duration::QUICK);
 }

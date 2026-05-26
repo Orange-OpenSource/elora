@@ -332,28 +332,24 @@ LoraFrameHeader::Deserialize(Buffer::Iterator start)
 void
 LoraFrameHeader::Print(std::ostream& os) const
 {
-    NS_LOG_FUNCTION_NOARGS();
-
-    os << "Address=" << m_address.Print() << std::endl;
-    os << "ADR=" << m_adr << std::endl;
-    os << "ADRAckReq=" << m_adrAckReq << std::endl;
-    os << "ACK=" << m_ack << std::endl;
-    os << "FPending=" << m_fPending << std::endl;
-    os << "FOptsLen=" << unsigned(m_fOptsLen) << std::endl;
-    os << "(FRMPCmdsLen=" << unsigned(m_frmpCmdsLen) << ")" << std::endl;
-    os << "FCnt=" << unsigned(m_fCnt) << std::endl;
-
-    for (auto it = m_macCommands.begin(); it != m_macCommands.end(); it++)
+    os << "FHDR(";
+    os << "Address=" << m_address.Print();
+    os << ", ADR=" << m_adr;
+    os << ", ADRAckReq=" << m_adrAckReq;
+    os << ", ACK=" << m_ack;
+    os << ", FPending=" << m_fPending;
+    os << ", FOptsLen=" << unsigned(m_fOptsLen);
+    os << ", FCnt=" << unsigned(m_fCnt);
+    for (const auto& c : m_macCommands)
     {
-        (*it)->Print(os);
+        os << ", ";
+        c->Print(os);
     }
-
+    os << ")";
     if (m_fPort > -1)
     {
-        os << "FPort=" << m_fPort;
+        os << ", FPort=" << m_fPort;
     }
-
-    os << std::endl;
 }
 
 void

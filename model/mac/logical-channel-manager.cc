@@ -104,8 +104,7 @@ LogicalChannelManager::GetSubBandFromFrequency(double frequency)
         }
     }
 
-    NS_LOG_ERROR("Requested frequency: " << frequency);
-    NS_ABORT_MSG("Warning: frequency is outside any known SubBand.");
+    NS_LOG_ERROR("Requested frequency=" << frequency << " is outside any known SubBand.");
 
     return nullptr; // If no SubBand is found, return 0
 }

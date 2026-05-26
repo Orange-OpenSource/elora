@@ -85,18 +85,46 @@ class ClassAEndDeviceLorawanMac : public BaseEndDeviceLorawanMac
     /////////////////////////
 
     /**
-     * Set the Data Rate to be used in the second receive window.
+     * Get the first receive window opening delay, starting from transmission end.
      *
-     * \param dataRate The Data Rate.
+     * @return The first receive window opening delay.
+     */
+    Time GetFirstReceiveWindowDelay();
+
+    /**
+     * Get the data rate that will be used in the first receive window.
+     *
+     * @return The data rate.
+     */
+    uint8_t GetFirstReceiveWindowDataRate();
+
+    /**
+     * Set the data rate to be used in the second receive window.
+     *
+     * @param dataRate The data rate.
      */
     void SetSecondReceiveWindowDataRate(uint8_t dataRate);
 
     /**
+     * Get the data rate that will be used in the second receive window.
+     *
+     * @return The data rate.
+     */
+    uint8_t GetSecondReceiveWindowDataRate() const;
+
+    /**
      * Set the frequency that will be used for the second receive window.
      *
-     * \param frequency the Frequency.
+     * @param frequencyHz The Frequency.
      */
-    void SetSecondReceiveWindowFrequency(double frequency);
+    void SetSecondReceiveWindowFrequency(uint32_t frequencyHz);
+
+    /**
+     * Get the frequency that is used for the second receive window.
+     *
+     * @return The frequency, in Hz.
+     */
+    uint32_t GetSecondReceiveWindowFrequency() const;
 
   protected:
     void DoInitialize() override;
@@ -146,7 +174,7 @@ class ClassAEndDeviceLorawanMac : public BaseEndDeviceLorawanMac
     /**
      * Perform the actions that need to be taken when receiving a RxTimingSetupReq command.
      */
-    void OnRxTimingSetupReq(Time delay) override;
+    void OnRxTimingSetupReq(uint8_t del) override;
 
     /**
      * The duration of a receive window in number of symbols. This should be

@@ -27,7 +27,6 @@
 
 #define ADR_ACK_LIMIT 64
 #define ADR_ACK_DELAY 32
-#define MAX_ADR_ACK_CNT (ADR_ACK_LIMIT + 7 * ADR_ACK_DELAY + 1)
 
 namespace ns3
 {
@@ -43,7 +42,7 @@ class BaseEndDeviceLorawanMac : public LorawanMac
     {
         Time firstAttempt;
         Ptr<Packet> packet = nullptr;
-        uint8_t nbTxLeft;
+        uint8_t nbTxLeft = 0;
         bool waitingAck = false;
         bool busy = false;
     };
@@ -185,16 +184,29 @@ class BaseEndDeviceLorawanMac : public LorawanMac
     uint8_t GetNumberOfTransmissions() const;
 
     /**
-     * Enable data rate adaptation in the retransmitting procedure.
-     *
-     * \param adapt If the data rate adaptation is enabled or not.
+     * Set the current value of the frame counter.
      */
-    void SetADRBackoff(bool adapt);
+    uint16_t GetFCnt() const;
 
     /**
-     * Get if data rate adaptation is enabled or not.
+     * Get the last known link margin from the demodulation floor.
+     *
+     * This is intended for asynchronous polling by the Application layer of the device. For
+     * synchronous behavior provide a callback using the trace system.
+     *
+     * @return The last known link margin [dB]
      */
-    bool GetADRBackoff() const;
+    uint8_t GetLastKnownLinkMarginDb() const;
+
+    /**
+     * Get the last known number of gateways concurrently receiving transmissions from the device.
+     *
+     * This is intended for asynchronous polling by the Application layer of the device. For
+     * synchronous behavior provide a callback using the trace system.
+     *
+     * @return The last known number of receiver gateways.
+     */
+    uint8_t GetLastKnownGatewayCount() const;
 
   protected:
     void DoInitialize() override;
@@ -266,10 +278,10 @@ class BaseEndDeviceLorawanMac : public LorawanMac
     uint16_t m_fCnt;
 
     /* Counter for keepalive purposes */
-    uint16_t m_ADRACKCnt;
+    uint16_t m_adrAckCnt;
 
     /* Uplink only - request keepalive acknowledgement from the server */
-    bool m_ADRACKReq;
+    bool m_adrAckReq;
 
     /**
      * The event of transmitting a packet in a consecutive moment, when the duty cycle let us
@@ -392,23 +404,24 @@ class BaseEndDeviceLorawanMac : public LorawanMac
     /**
      * Perform the actions that need to be taken when receiving a LinkAdrReq command.
      *
-     * \param dataRate The data rate value of the command.
-     * \param txPower The transmission power value of the command.
-     * \param enabledChannels A list of the enabled channels.
-     * \param repetitions The number of repetitions prescribed by the command.
+     * @param dataRate The data rate value of the command.
+     * @param txPower The transmission power value of the command.
+     * @param chMask Mask of enabled channels of the command.
+     * @param chMaskCntl Indicator of the 16 channel bank to apply the chMask to.
+     * @param nbTrans The number of repetitions prescribed by the command.
      */
     void OnLinkAdrReq(uint8_t dataRate,
                       uint8_t txPower,
-                      std::list<int> enabledChannels,
-                      int repetitions);
+                      uint16_t chMask,
+                      uint8_t chMaskCntl,
+                      uint8_t nbTrans);
 
     /**
      * Perform the actions that need to be taken when receiving a DutyCycleReq command.
      *
-     * \param dutyCycle The aggregate duty cycle prescribed by the command, in
-     * fraction form.
+     * \param dutyCycle The aggregate duty cycle parameter from the command
      */
-    void OnDutyCycleReq(double dutyCycle);
+    void OnDutyCycleReq(uint8_t maxDutyCycle);
 
     /**
      * Perform the actions that need to be taken when receiving a RxParamSetupReq command.
@@ -433,7 +446,7 @@ class BaseEndDeviceLorawanMac : public LorawanMac
     /**
      * Perform the actions that need to be taken when receiving a RxTimingSetupReq command.
      */
-    virtual void OnRxTimingSetupReq(Time delay) = 0;
+    virtual void OnRxTimingSetupReq(uint8_t del) = 0;
 
     /**
      * Perform the actions that need to be taken when receiving a DlChannelReq command.
@@ -457,16 +470,11 @@ class BaseEndDeviceLorawanMac : public LorawanMac
     /**
      * Whether this device's data rate should be controlled by the NS.
      */
-    bool m_ADRBit;
+    bool m_adr;
 
     ////////////////////////////////
     // Private MAC Layer settings //
     ////////////////////////////////
-
-    /**
-     * Enable Data Rate adaptation during the retransmission procedure.
-     */
-    bool m_enableADRBackoff;
 
     /**
      * Whether this device's should use cryptography according to specifications.
@@ -482,21 +490,21 @@ class BaseEndDeviceLorawanMac : public LorawanMac
     ///////////////////////////////
 
     /**
-     * The last known link margin.
+     * The last known link margin in dB from the demodulation floor.
      *
      * This value is obtained (and updated) when a LinkCheckAns Mac command is
      * received.
      */
-    TracedValue<double> m_lastKnownLinkMargin;
+    TracedValue<uint8_t> m_lastKnownLinkMargin;
 
     /**
      * The last known gateway count (i.e., gateways that are in communication
-     * range with this end device)
+     * range with this end device).
      *
      * This value is obtained (and updated) when a LinkCheckAns Mac command is
      * received.
      */
-    TracedValue<int> m_lastKnownGatewayCount;
+    TracedValue<uint8_t> m_lastKnownGatewayCount;
 
     ///////////////////////
     // Private Utilities //

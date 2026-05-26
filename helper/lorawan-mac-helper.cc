@@ -65,7 +65,14 @@ LorawanMacHelper::Install(Ptr<LoraNetDevice> device) const
     default:
         NS_LOG_ERROR("This region isn't supported yet!");
     }
-    device->SetMac(mac);
+    if (device)
+    {
+        device->SetMac(mac);
+    }
+    else
+    {
+        NS_LOG_WARN("Provided LoraNetDevice is null");
+    }
     return mac;
 }
 
